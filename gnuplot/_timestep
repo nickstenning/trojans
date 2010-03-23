@@ -1,0 +1,5 @@
+pause pauseTime
+t = t+dt
+replot
+
+if (t+dt <= T) load 'gnuplot/_timestep'
