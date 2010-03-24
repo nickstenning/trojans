@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, commands
+import os, commands, re
 from fabricate import *
 
 compiler = commands.getoutput('which llvm-g++ || echo -n "g++"')
@@ -40,4 +40,17 @@ def rebuild():
     clean()
     build()
 
+class QuieterBuilder(Builder):
+    def echo_command(self, command):
+        compiling = re.compile(r'-c (\S+\.cc)\b', re.IGNORECASE).search(command)
+        linking   = re.compile(r'((?:\S+\.o\s+)+)-o (\S+)\b', re.IGNORECASE).search(command)
+        if compiling:
+            self.echo('CC ' + compiling.group(1))
+        elif linking:
+            # self.echo('LD ' + linking.group(1) + '-> ' + linking.group(2))
+            self.echo('LD ' + linking.group(2))
+        else:
+            self.echo(command)
+
+setup(builder=QuieterBuilder)
 main()
