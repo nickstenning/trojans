@@ -1,8 +1,5 @@
 #include "point.hh"
 
-#include <cmath>
-#include <sstream>
-
 using namespace std;
 
 Point::Point(double x0, double y0) : x(x0), y(y0) {}

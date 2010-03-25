@@ -3,6 +3,7 @@
 
 namespace C {
   extern const double pi;
+  extern const double G_scaled;
 }
 
 #endif

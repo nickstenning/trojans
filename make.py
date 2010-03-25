@@ -6,8 +6,8 @@ from fabricate import *
 compiler = commands.getoutput('which llvm-g++ || echo -n "g++"')
          
 target  = 'trojans'
-sources = ['trojans', 'constants', 'point']
-pkgs    = ['']
+sources = ['trojans', 'simulator', 'particle', 'point', 'constants']
+pkgs    = ['gsl']
         
 cflags  = '''-g -O2 -ansi -pedantic -Wall -Wextra -Wconversion -Wshadow 
               -Wpointer-arith -Wcast-qual -Wwrite-strings
