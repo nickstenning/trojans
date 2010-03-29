@@ -1,10 +1,10 @@
 #include "particle.hh"
 #include "simulator.hh"
+#include "constants.hh"
 
 #include <iostream>
 #include <iomanip>
-#include <string>
-#include <fstream>
+#include <cmath>
 
 using namespace std;
 
@@ -27,14 +27,23 @@ int main (int argc, char * const argv [])
 
     Simulator sim(outputDir);
 
-    FixedParticle sun("sun", 1.0, Point(0,0));
-    Particle jup("jupiter", 0.001, Point(0,5.2), Arrow(2.757,0)); // 2.757 AU/year is plausible.
+    double Rjup = 5.2;
+    double Vjup = 2.757;
+
+    double trojAngle = (C::pi / 3.0);
+
+    Particle sun("sun", 1.0, Point(), Arrow());
+    Particle jup("jupiter", 0.001, Point(0, Rjup), Arrow(Vjup, 0)); // 2.757 AU/year is plausible.
+    Particle tro("trojans", 0,
+                 Point(Rjup * sin(trojAngle),  Rjup * cos(trojAngle)),
+                 Arrow(Vjup * cos(trojAngle), -Vjup * sin(trojAngle)));
 
     sim.addParticle(sun);
     sim.addParticle(jup);
+    sim.addParticle(tro);
 
-    sim.run(23.8); // period of Jupiter is ~11.9 years, so this should be about
-                   // two orbits.
+    sim.run(25); // period of Jupiter is ~11.9 years, so this should be about
+                 // two orbits.
 
     return 0;
   }

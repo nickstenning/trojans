@@ -101,38 +101,3 @@ ostream& operator<< (ostream &os, const Particle& obj)
   os << "<Particle " << obj.name << " r:" << obj.r << " v:" << obj.v << ">";
   return os;
 }
-
-// =================
-// = FixedParticle =
-// =================
-
-FixedParticle::FixedParticle (string n, const double m, Point r0 = Point())
-: Particle(n, m, r0, Arrow())
-{}
-
-void FixedParticle::setPosition (const Point&) {}
-void FixedParticle::setVelocity (const Arrow&) {}
-
-Arrow FixedParticle::computeAcceleration (const ParticleList&) const
-{
-  return Arrow(0.0, 0.0);
-}
-
-double FixedParticle::computeEnergy (const ParticleList&) const
-{
-  return 0.0;
-}
-
-void FixedParticle::openDataFile (const string outputDir)
-{
-  Particle::openDataFile(outputDir);
-  dataFile << r.x << "\t" << r.y << endl;
-}
-
-void FixedParticle::printDataLine (double, const ParticleList&) {}
-
-string FixedParticle::dataFileHeader () const
-{
-  return "# r_x\tr_y";
-}
-

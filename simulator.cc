@@ -37,10 +37,7 @@ void Simulator::run (double tMax)
 
   gsl_odeiv_system sys = {func, jac, degreesOfFreedom(), &params};
 
-  double* y = NULL;
-  double* y_err = NULL;
-  double* dydt_in = NULL;
-  double* dydt_out = NULL;
+  double *y = NULL, *y_err = NULL, * dydt_in = NULL, * dydt_out = NULL;
 
   y        = new double[degreesOfFreedom()];
   y_err    = new double[degreesOfFreedom()];
