@@ -13,6 +13,8 @@
 class Particle;
 
 typedef std::vector<Particle*> ParticleList;
+typedef ParticleList::iterator ParticleIterator;
+typedef ParticleList::const_iterator ParticleConstIterator;
 
 class Particle
 {
@@ -39,6 +41,8 @@ public:
   std::string dataFileHeader() const;
 
   friend std::ostream& operator<< (std::ostream& os, const Particle& p);
+
+  bool isFixed;
 protected:
   std::string name;
   double mass;

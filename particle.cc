@@ -9,7 +9,9 @@ using namespace std;
 
 Particle::Particle (string n, const double m, Point r0 = Point(), Arrow v0 = Arrow())
 : name(n), mass(m), r(r0), v(v0)
-{}
+{
+  isFixed = false;
+}
 
 Point Particle::getPosition () { return r; }
 
@@ -23,7 +25,7 @@ Arrow Particle::computeAcceleration (const ParticleList& particles)
 {
   Arrow accel, distance;
 
-  for (ParticleList::const_iterator p = particles.begin(); p != particles.end(); ++p)
+  for (ParticleConstIterator p = particles.begin(); p != particles.end(); ++p)
   {
     if (**p != *this) { // Don't calculate acceleration due to yourself!
       distance = (*p)->getPosition() - this->getPosition();
@@ -40,7 +42,7 @@ double Particle::computeEnergy (const ParticleList& particles)
   Arrow distance;
 
   // PE
-  for (ParticleList::const_iterator p = particles.begin(); p != particles.end(); ++p)
+  for (ParticleConstIterator p = particles.begin(); p != particles.end(); ++p)
   {
     if (**p != *this) { // Don't calculate acceleration due to yourself!
       distance = (*p)->getPosition() - this->getPosition();

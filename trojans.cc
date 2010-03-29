@@ -31,19 +31,26 @@ int main (int argc, char * const argv [])
     double Vjup = 2.757;
 
     double trojAngle = (C::pi / 3.0);
+    double delta = 1.0;
 
     Particle sun("sun", 1.0, Point(), Arrow());
     Particle jup("jupiter", 0.001, Point(0, Rjup), Arrow(Vjup, 0)); // 2.757 AU/year is plausible.
     Particle tro("trojans", 0,
+                 // Point((Rjup + delta) * sin(trojAngle), (Rjup + delta) * cos(trojAngle)),
                  Point(Rjup * sin(trojAngle),  Rjup * cos(trojAngle)),
                  Arrow(Vjup * cos(trojAngle), -Vjup * sin(trojAngle)));
+    Particle gre("greeks", 0,
+                 Point(-Rjup * sin(trojAngle), Rjup * cos(trojAngle)),
+                 Arrow( Vjup * cos(trojAngle), Vjup * sin(trojAngle)));
+
+    sun.isFixed = true;
 
     sim.addParticle(sun);
     sim.addParticle(jup);
     sim.addParticle(tro);
+    sim.addParticle(gre);
 
-    sim.run(25); // period of Jupiter is ~11.9 years, so this should be about
-                 // two orbits.
+    sim.run(20 * sqrt(pow(Rjup, 3)));
 
     return 0;
   }
