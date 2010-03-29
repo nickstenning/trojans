@@ -28,11 +28,13 @@ public:
 
   int addParticle (Particle& p);
 
-  int run (double tMax);
+  void run (double tMax);
 
   friend class Particle;
   friend std::ostream& operator<< (std::ostream& os, const Simulator& s);
 
+  static const size_t dofParticle = 4;
+  virtual size_t degreesOfFreedom();
 private:
   ParticleList particles;
   std::string outputDir;

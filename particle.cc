@@ -11,15 +11,15 @@ Particle::Particle (string n, const double m, Point r0 = Point(), Arrow v0 = Arr
 : name(n), mass(m), r(r0), v(v0)
 {}
 
-Point Particle::getPosition () const { return r; }
+Point Particle::getPosition () { return r; }
 
 void Particle::setPosition (const Point& pos){ r = pos; }
 
-Arrow Particle::getVelocity () const { return v; }
+Arrow Particle::getVelocity () { return v; }
 
 void Particle::setVelocity (const Arrow& vel) { v = vel; }
 
-Arrow Particle::computeAcceleration (const ParticleList& particles) const
+Arrow Particle::computeAcceleration (const ParticleList& particles)
 {
   Arrow accel, distance;
 
@@ -34,7 +34,7 @@ Arrow Particle::computeAcceleration (const ParticleList& particles) const
   return accel;
 }
 
-double Particle::computeEnergy (const ParticleList& particles) const
+double Particle::computeEnergy (const ParticleList& particles)
 {
   double energy = 0.0;
   Arrow distance;
@@ -81,12 +81,12 @@ void Particle::printDataLine (double t, const ParticleList& particles)
            << computeEnergy(particles) << endl;
 }
 
-bool Particle::operator== (const Particle& rhs) const
+bool Particle::operator== (const Particle& rhs)
 {
   return (name == rhs.name);
 }
 
-bool Particle::operator!= (const Particle& rhs) const
+bool Particle::operator!= (const Particle& rhs)
 {
   return !(*this == rhs);
 }
@@ -110,6 +110,9 @@ FixedParticle::FixedParticle (string n, const double m, Point r0 = Point())
 : Particle(n, m, r0, Arrow())
 {}
 
+void FixedParticle::setPosition (const Point&) {}
+void FixedParticle::setVelocity (const Arrow&) {}
+
 Arrow FixedParticle::computeAcceleration (const ParticleList&) const
 {
   return Arrow(0.0, 0.0);
@@ -132,3 +135,4 @@ string FixedParticle::dataFileHeader () const
 {
   return "# r_x\tr_y";
 }
+

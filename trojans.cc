@@ -8,13 +8,17 @@
 
 using namespace std;
 
-int main (int argc, char * const argv []) {
-  if (argc != 2) {
+int main (int argc, char * const argv [])
+{
+  if (argc != 2)
+  {
     cerr << "Usage: trojans <outputdir>" << endl << endl;
     cerr << "Output will be multiple files. Run ./movie <outputdir> to see the result." << endl;
     return 1;
 
-  } else {
+  }
+  else
+  {
     // Increase precision of double printers.
     cout << setprecision(9);
     cerr << setprecision(9);

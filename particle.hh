@@ -20,21 +20,21 @@ public:
   Particle (std::string name, double mass, Point x0, Arrow v0);
   virtual ~Particle() {};
 
-  virtual Point getPosition () const;
+  virtual Point getPosition ();
   virtual void setPosition (const Point& pos);
 
-  virtual Arrow getVelocity () const;
+  virtual Arrow getVelocity ();
   virtual void setVelocity (const Arrow& vel);
 
-  virtual Arrow computeAcceleration (const ParticleList& particles) const;
-  virtual double computeEnergy (const ParticleList& particles) const;
+  virtual Arrow computeAcceleration (const ParticleList& particles);
+  virtual double computeEnergy (const ParticleList& particles);
 
   virtual void openDataFile (const std::string outputDir);
   virtual void closeDataFile ();
   virtual void printDataLine (double time, const ParticleList& particles);
 
-  virtual bool operator== (const Particle& rhs) const;
-  virtual bool operator!= (const Particle& rhs) const;
+  virtual bool operator== (const Particle& rhs);
+  virtual bool operator!= (const Particle& rhs);
 
   virtual std::string dataFileHeader() const;
 
@@ -52,6 +52,9 @@ class FixedParticle : public Particle
 {
 public:
   FixedParticle (std::string name, double mass, Point r0);
+
+  virtual void setPosition (const Point& pos);
+  virtual void setVelocity (const Arrow& vel);
 
   virtual Arrow computeAcceleration (const ParticleList& particles) const;
   virtual double computeEnergy (const ParticleList& particles) const;
