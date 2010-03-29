@@ -1,27 +1,41 @@
-#include "particle.hh"
-#include "constants.hh"
-
-// #include <gsl/gsl_errno.h>
-// #include <gsl/gsl_matrix.h>
-// #include <gsl/gsl_odeiv.h>
-#include <vector>
-#include <string>
-
 #ifndef SIMULATOR_HH_
 #define SIMULATOR_HH_
 
-class Simulator {
-  public:
-    Simulator(std::string outputDir);
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_odeiv.h>
+#include <vector>
+#include <string>
+#include <fstream>
 
-    int addParticle(const Particle &p);
-    Arrow computeAcceleration(const Particle &p);
-    int run(double time);
-    void step(double time, double dt);
-    void printTrajectories();
-  private:
-    std::vector<Particle> particles;
-    std::string outputDir;
+#include "point.hh"
+#include "particle.hh"
+
+enum { r_x = 0, r_y = 1, v_x = 2, v_y = 3 };
+
+struct Params {
+  ParticleList* particles;
+};
+
+int func (double t, const double y[], double dy_dt[], void *params);
+int jac (double t, const double y[], double *dfdy, double dfdt[], void *params);
+
+class Simulator
+{
+public:
+  Simulator (std::string outputDir);
+  ~Simulator ();
+
+  int addParticle (Particle& p);
+
+  int run (double tMax);
+
+  friend class Particle;
+  friend std::ostream& operator<< (std::ostream& os, const Simulator& s);
+
+private:
+  ParticleList particles;
+  std::string outputDir;
 };
 
 #endif /* SIMULATOR_HH_ */

@@ -1,5 +1,5 @@
-#include "simulator.hh"
 #include "particle.hh"
+#include "simulator.hh"
 
 #include <iostream>
 #include <iomanip>
@@ -23,43 +23,14 @@ int main (int argc, char * const argv []) {
 
     Simulator sim(outputDir);
 
-    Particle sun("sun", 1.0, Point(0,0), Arrow(0,0));
+    FixedParticle sun("sun", 1.0, Point(0,0));
     Particle jup("jupiter", 0.001, Point(0,5.2), Arrow(2.757,0)); // 2.757 AU/year is plausible.
-    Particle jup2("jupiter2", 0.001, Point(0,-5.2), Arrow(2.757,0)); // 2.757 AU/year is plausible.
 
     sim.addParticle(sun);
     sim.addParticle(jup);
-    sim.addParticle(jup2);
 
-    // sim.run();
-
-    cout << jup << " acceleration: " << sim.computeAcceleration(jup) << endl;
-    cout << jup2 << " acceleration: " << sim.computeAcceleration(jup2) << endl;
-    cout << sun << " acceleration: " <<  sim.computeAcceleration(sun) << endl;
-
-    //
-    //
-    //     cout << "Writing to " << outputDir << endl;
-    //
-    //     ofstream sunData((outputDir + "sun").c_str());
-    //     ofstream jupData((outputDir + "jupiter").c_str());
-    //
-    //     string gnuplotHeader("# t\tx[0]\tx[1]\tv[0]\tv[1]\tT\tV\tT+V");
-    //
-    //     if (sunData.is_open() && jupData.is_open()) {
-    //       // Sun has fixed coordinates.
-    //       sunData << "# SUN" << endl;
-    //       sunData << "0 0" << endl;
-    //       // Trajectory files for others.
-    //       jupData << "# JUPITER" << endl;
-    //       jupData << gnuplotHeader << endl;
-    //
-    //       sunData.close();
-    //       jupData.close();
-    //     } else {
-    //       cout << "ERROR: Unable to open output files for writing!" << endl;
-    //       return 1;
-    //     }
+    sim.run(23.8); // period of Jupiter is ~11.9 years, so this should be about
+                   // two orbits.
 
     return 0;
   }

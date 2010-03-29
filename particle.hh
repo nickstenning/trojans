@@ -1,28 +1,66 @@
+#ifndef PARTICLE_HH_
+#define PARTICLE_HH_
+
 #include "point.hh"
+#include "constants.hh"
 
 #include <cmath>
 #include <vector>
 #include <string>
 #include <iostream>
+#include <fstream>
 
-#ifndef PARTICLE_HH_
-#define PARTICLE_HH_
+class Particle;
 
-class Particle {
-  public:
-    Particle(std::string name, double mass, Point x0, Arrow v0);
+typedef std::vector<Particle*> ParticleList;
 
-    bool operator==(const Particle &rhs) const;
-    bool operator!=(const Particle &rhs) const;
+class Particle
+{
+public:
+  Particle (std::string name, double mass, Point x0, Arrow v0);
+  virtual ~Particle() {};
 
-    friend std::ostream &operator<<(std::ostream &os, const Particle &p);
-    friend class Simulator;
+  virtual Point getPosition () const;
+  virtual void setPosition (const Point& pos);
 
-  private:
-    std::string name;
-    double mass;
-    Point x;
-    Arrow v;
+  virtual Arrow getVelocity () const;
+  virtual void setVelocity (const Arrow& vel);
+
+  virtual Arrow computeAcceleration (const ParticleList& particles) const;
+  virtual double computeEnergy (const ParticleList& particles) const;
+
+  virtual void openDataFile (const std::string outputDir);
+  virtual void closeDataFile ();
+  virtual void printDataLine (double time, const ParticleList& particles);
+
+  virtual bool operator== (const Particle& rhs) const;
+  virtual bool operator!= (const Particle& rhs) const;
+
+  virtual std::string dataFileHeader() const;
+
+  friend std::ostream& operator<< (std::ostream& os, const Particle& p);
+protected:
+  std::string name;
+  double mass;
+  Point r; // position vector
+  Arrow v; // velocity vector
+
+  std::ofstream dataFile;
+};
+
+class FixedParticle : public Particle
+{
+public:
+  FixedParticle (std::string name, double mass, Point r0);
+
+  virtual Arrow computeAcceleration (const ParticleList& particles) const;
+  virtual double computeEnergy (const ParticleList& particles) const;
+
+  virtual void openDataFile (const std::string outputDir);
+  virtual void printDataLine (double time, const ParticleList& particles);
+
+  virtual std::string dataFileHeader() const;
 };
 
 #endif
+
