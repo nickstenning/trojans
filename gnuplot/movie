@@ -4,27 +4,36 @@ set size ratio -1 # scale 1:1
 
 set nokey
 set nomouse
+set macros
 
-r = 2
+r = 8
 
 set xrange [-r:r]
 set yrange [-r:r]
 
 t = 0
 dt = 2
-T = 500
+T = 2370
 pauseTime = 0.02
 
 # planet styles
 set style line 1 ps 6 pt 7 # sun
 set style line 2 ps 3 pt 7 # jupiter
-set style line 3 ps 3 pt 7 # jupiter
+set style line 3 ps 1 pt 7 # trojans
+set style line 4 ps 1 pt 7 # greeks
 
 # 'every 1::t::t' plots only the 't'th point.
 # 'every 10::0::t' plots every 10th point from 0 to the 't'th point.
 
-plot d.'/sun' w p ls 1, \
-     d.'/jupiter' every 1::t::t u 3:2 w p ls 2, \
-     d.'/jupiter' every 5::0::t u 3:2 w l ls 2
+point = "every 1::t::t u 2:3 w p"
+trajectory = "every 1::(t > dt * 10 ? t - dt * 10 : 0)::t u 2:3 w l"
+
+plot d.'/sun'     @point ls 1, \
+     d.'/jupiter' @point ls 2, \
+     d.'/trojans' @point ls 3, \
+     d.'/greeks'  @point ls 4, \
+     d.'/jupiter' @trajectory ls 2, \
+     d.'/trojans' @trajectory ls 3, \
+     d.'/greeks'  @trajectory ls 4
 
 load 'gnuplot/_timestep'
