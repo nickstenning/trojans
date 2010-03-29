@@ -1,0 +1,5 @@
+* Switch to adaptive RK step function
+* Concatenation script? (For piping into gnuplot)
+* Plots of:
+  * sep angle/distance of asteroids/jupiter over ~100 orbits
+  * total system energy over several orbits
