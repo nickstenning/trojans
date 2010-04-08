@@ -147,12 +147,26 @@ int func (double /*t*/, const double y [], double dy_dt [], void* params) {
   return GSL_SUCCESS;
 }
 
-// int jac (double t, const double y[], double *dfdy, double dfdt[], void *params)
-int jac (double, const double [], double*, double [], void* )
+int jac (double /*t*/, const double /*y*/[], double *df_dy, double df_dt[], void *params)
 {
-  // Params *p = (Params *) params;
+  Params *p = (Params *) params;
 
-  // Don't use jacobian at the moment.
+  size_t dof = Simulator::dofParticle * p->particles->size();
+
+  gsl_matrix_view df_dy_mat = gsl_matrix_view_array(df_dy, dof, dof);
+  gsl_matrix* m = &df_dy_mat.matrix;
+
+  /* Most matrix elements are zero */
+  gsl_matrix_set_zero(m);
+
+  for(size_t idx = 0; idx < p->particles->size(); ++idx)
+  {
+    /* d(dr/dt)/dv = 1.0 */
+    gsl_matrix_set(m, ypos(idx, r_x), ypos(idx, v_x), 1.0);
+    gsl_matrix_set(m, ypos(idx, r_y), ypos(idx, v_y), 1.0);
+  }
+
+  fill(df_dt, df_dt + dof, 0.0);
 
   return GSL_SUCCESS;
 }

@@ -31,7 +31,6 @@ int main (int argc, char * const argv [])
     double Vjup = 2.757;
 
     double trojAngle = (C::pi / 3.0);
-    double delta = 1.0;
 
     Particle sun("sun", 1.0, Point(), Arrow());
     Particle jup("jupiter", 0.001, Point(0, Rjup), Arrow(Vjup, 0)); // 2.757 AU/year is plausible.
