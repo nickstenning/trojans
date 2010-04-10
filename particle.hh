@@ -44,6 +44,7 @@ public:
 
   bool isFixed;
   double lastComputedEnergy;
+  Arrow lastComputedAccel;
 protected:
   std::string name;
   double mass;

@@ -44,6 +44,8 @@ Arrow Particle::computeAcceleration (const ParticleList& particles)
       accel += (C::G_scaled * (*p)->mass * distance) / pow(distance.norm(), 3);
     }
   }
+  
+  lastComputedAccel = accel;
 
   return accel;
 }
@@ -101,6 +103,7 @@ void Particle::printDataLine (double t, const ParticleList& particles)
   dataFile << t << "\t"
            << r.x << "\t" << r.y << "\t"
            << v.x << "\t" << v.y << "\t"
+           << lastComputedAccel.x << "\t" << lastComputedAccel.y << "\t"
            << computeEnergy(particles) << endl;
 }
 
@@ -119,7 +122,7 @@ string Particle::dataFileHeader () const
   if (isFixed) {
     return "# r_x\tr_y";
   }
-  return "# t\tr_x\tr_y\tv_x\tv_y\tenergy";
+  return "# t\tr_x\tr_y\tv_x\tv_y\ta_x\ta_y\tenergy";
 }
 
 ostream& operator<< (ostream &os, const Particle& obj)

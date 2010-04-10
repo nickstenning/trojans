@@ -20,14 +20,18 @@ pauseTime = 0.01
 # 'every 10::0::t' plots every 10th point from 0 to the 't'th point.
 
 point = "every 1::t::t u 2:3 w p"
+accel = "every 1::t::t u 2:3:6:7 w vectors"
 trajectory = "every 1::(t > 30 ? t - 30 : 0)::t u 2:3 w l"
 
 plot 'sun'     u 1:2 ls 1, \
      'jupiter' @point ls 2, \
+     'jupiter' @accel ls 2, \
      'jupiter' @trajectory ls 2, \
      'trojans' @point ls 3, \
-     'greeks'  @point ls 4, \
+     'trojans' @accel ls 3, \
      'trojans' @trajectory ls 3, \
+     'greeks'  @point ls 4, \
+     'greeks'  @accel ls 4, \
      'greeks'  @trajectory ls 4
 
 load d.'/gnuplot/_timestep'
