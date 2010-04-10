@@ -87,7 +87,7 @@ int main (int argc, char * const argv [])
 
 void onframe(size_t frame)
 {
-  if (frame % 100 == 0)
+  if (frame % 10 == 0)
   {
     if (frame > 0)
     {
