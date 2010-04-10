@@ -30,19 +30,25 @@ public:
 
   int addParticle (Particle& p);
 
-  void run (double tMax);
+  void run (double tMax, 
+            size_t numFrames, 
+            void(*onFrameFunc)(size_t)) throw(std::string);
 
   friend class Particle;
   friend std::ostream& operator<< (std::ostream& os, const Simulator& s);
 
   static const size_t dofParticle = 4;
   virtual size_t degreesOfFreedom() const;
+  
+  void openDataFile ();
+  void closeDataFile ();
+  void printDataLine ();
 protected:
   ParticleList particles;
   std::string outputDir;
+  std::ofstream dataFile;
   double t;
   double dt;
-  int numSteps;
 
   void setArrayFromParticles(double y []);
   void updateParticlesFromArray(const double y []);

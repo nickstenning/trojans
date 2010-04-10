@@ -15,14 +15,26 @@ Particle::Particle (string n, const double m, Point r0 = Point(), Arrow v0 = Arr
 
 Point Particle::getPosition () { return r; }
 
-void Particle::setPosition (const Point& pos){ r = pos; }
+void Particle::setPosition (const Point& pos)
+{
+  if (isFixed) { return; }
+  r = pos;
+}
 
 Arrow Particle::getVelocity () { return v; }
 
-void Particle::setVelocity (const Arrow& vel) { v = vel; }
+void Particle::setVelocity (const Arrow& vel) 
+{
+  if (isFixed) { return; }
+  v = vel;
+}
 
 Arrow Particle::computeAcceleration (const ParticleList& particles)
 {
+  if (isFixed) {
+    return Arrow(0.0, 0.0);
+  }
+  
   Arrow accel, distance;
 
   for (ParticleConstIterator p = particles.begin(); p != particles.end(); ++p)
@@ -38,12 +50,15 @@ Arrow Particle::computeAcceleration (const ParticleList& particles)
 
 double Particle::computeEnergy (const ParticleList& particles)
 {
+  if (isFixed) {
+    return 0.0;
+  }
+  
   double energy = 0.0;
   Arrow distance;
 
   // PE
-  for (ParticleConstIterator p = particles.begin(); p != particles.end(); ++p)
-  {
+  for (ParticleConstIterator p = particles.begin(); p != particles.end(); ++p) {
     if (**p != *this) { // Don't calculate acceleration due to yourself!
       distance = (*p)->getPosition() - this->getPosition();
       energy += (C::G_scaled * (*p)->mass * mass) / distance.norm();
@@ -52,6 +67,8 @@ double Particle::computeEnergy (const ParticleList& particles)
 
   // KE
   energy += (mass * v.normsq()) / 2.0;
+
+  lastComputedEnergy = energy;
 
   return energy;
 }
@@ -64,6 +81,9 @@ void Particle::openDataFile (const string outputDir)
   if (dataFile.is_open()) {
     dataFile << "# " << name << endl;
     dataFile << dataFileHeader() << endl;
+    if (isFixed) { 
+      dataFile << r.x << "\t" << r.y << endl;
+    }
   } else {
     cerr << "ERROR: Unable to open output file for writing (" << fname << ")!" << endl;
     exit(2);
@@ -77,6 +97,7 @@ void Particle::closeDataFile ()
 
 void Particle::printDataLine (double t, const ParticleList& particles)
 {
+  if (isFixed) { return; }
   dataFile << t << "\t"
            << r.x << "\t" << r.y << "\t"
            << v.x << "\t" << v.y << "\t"
@@ -95,6 +116,9 @@ bool Particle::operator!= (const Particle& rhs)
 
 string Particle::dataFileHeader () const
 {
+  if (isFixed) {
+    return "# r_x\tr_y";
+  }
   return "# t\tr_x\tr_y\tv_x\tv_y\tenergy";
 }
 

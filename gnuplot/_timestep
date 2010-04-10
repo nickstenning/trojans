@@ -1,5 +1,5 @@
 pause pauseTime
-t = t+dt
+t = t + 1
 replot
 
-if (t+dt < T) load 'gnuplot/_timestep'
+if (t + 1 < T) load d.'/gnuplot/_timestep'

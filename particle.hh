@@ -43,6 +43,7 @@ public:
   friend std::ostream& operator<< (std::ostream& os, const Particle& p);
 
   bool isFixed;
+  double lastComputedEnergy;
 protected:
   std::string name;
   double mass;

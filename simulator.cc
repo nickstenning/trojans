@@ -10,6 +10,8 @@ Simulator::Simulator (string od) : outputDir(od)
   }
 
   system(("mkdir -p " + outputDir).c_str());
+  
+  openDataFile();
 }
 
 Simulator::~Simulator () {
@@ -17,6 +19,7 @@ Simulator::~Simulator () {
   {
     (*p)->closeDataFile();
   }
+  closeDataFile();
 }
 
 int Simulator::addParticle (Particle &p)
@@ -26,57 +29,61 @@ int Simulator::addParticle (Particle &p)
   return particles.size();
 }
 
-void Simulator::run (double tMax)
+void Simulator::run (double tMax, size_t numFrames, 
+                     void (*onFrameFunc)(size_t)) throw(string)
 {
   Params params;
   params.particles = &particles;
 
   size_t dof = degreesOfFreedom();
 
-  // Non-adaptive RK4 integration steps
-  gsl_odeiv_step* s = gsl_odeiv_step_alloc(gsl_odeiv_step_rk4, dof);
+  // Embedded Runge-Kutta Prince-Dormand (8, 9) stepping function
+  // gsl_odeiv_step* s = gsl_odeiv_step_alloc(gsl_odeiv_step_rk8pd, dof);
+
+  // Embedded Runge-Kutta-Fehlberg (4, 5) stepping function
+  gsl_odeiv_step* s = gsl_odeiv_step_alloc(gsl_odeiv_step_rk8pd, dof);
+
+  gsl_odeiv_control* c = gsl_odeiv_control_y_new(1e-20, 0);
+  gsl_odeiv_evolve* e = gsl_odeiv_evolve_alloc(dof);
 
   gsl_odeiv_system sys = {func, jac, dof, &params};
 
-  double *y, *y_err, *dydt_in, *dydt_out;
-  y = y_err = dydt_in = dydt_out = NULL;
-
-  y        = new double[dof];
-  y_err    = new double[dof];
-  dydt_in  = new double[dof];
-  dydt_out = new double[dof];
+  double *y = NULL;
+  y = new double[dof];
 
   setArrayFromParticles(y);
 
   t  = 0.0;
-  dt = 1.0e-3;
-  numSteps = 0;
-
-  GSL_ODEIV_FN_EVAL(&sys, t, y, dydt_in);
-
-  while (t < tMax)
+  dt = 1e-6;
+  
+  for (size_t frame = 0; frame < numFrames; ++frame)
   {
-    int status = gsl_odeiv_step_apply(s, t, dt, y, y_err, dydt_in, dydt_out, &sys);
+      double tFrame = frame * (tMax / numFrames);
 
-    if (status != GSL_SUCCESS) { break; }
+      while (t < tFrame)
+      {
+        // setArrayFromParticles(y);
+        
+        int status = gsl_odeiv_evolve_apply(e, c, s, &sys, &t, tFrame, &dt, y);
 
-    updateParticlesFromArray(y);
-
-    for(size_t idx = 0; idx < dof; ++idx) {
-      dydt_in[idx] = dydt_out[idx];
-    }
-
-    ++numSteps;
-    t += dt;
+        if (status != GSL_SUCCESS) {
+          throw string("GSL failure.");
+          break;
+        }
+        
+        updateParticlesFromArray(y);
+      }
+      
+      printDataLine();
+      onFrameFunc(frame);
   }
-
+  
   gsl_odeiv_step_free(s);
+  gsl_odeiv_evolve_free(e);
+  gsl_odeiv_control_free(c);
 
   delete [] y;
-  delete [] y_err;
-  delete [] dydt_in;
-  delete [] dydt_out;
-  y = y_err = dydt_in = dydt_out = NULL;
+  y = NULL;
 }
 
 size_t Simulator::degreesOfFreedom () const
@@ -86,7 +93,12 @@ size_t Simulator::degreesOfFreedom () const
 
 ostream& operator<< (ostream &os, const Simulator& obj)
 {
-  os << "<Simulator particles:" << obj.particles.size() << ">";
+  os << "<Simulator particles:[" << endl;
+  for (ParticleConstIterator p = obj.particles.begin(); p != obj.particles.end(); ++p)
+  {
+    os << "  " << **p << "," << endl;
+  }
+  os << "]>";
   return os;
 }
 
@@ -109,19 +121,49 @@ void Simulator::updateParticlesFromArray(const double y [])
   for (ParticleIterator p = particles.begin(); p != particles.end(); ++p)
   {
     ParticleList::difference_type idx = p - particles.begin();
-    if (!(*p)->isFixed) {
-      (*p)->setPosition(
-        Point(y[ypos(idx, r_x)], y[ypos(idx, r_y)])
-      );
-      (*p)->setVelocity(
-        Arrow(y[ypos(idx, v_x)], y[ypos(idx, v_y)])
-      );
-    }
-    if (numSteps % 100 == 0) {
-      // Data updated, print data lines to file.
-      (*p)->printDataLine(t, particles);
-    }
+    
+    (*p)->setPosition(
+      Point(y[ypos(idx, r_x)], y[ypos(idx, r_y)])
+    );
+    (*p)->setVelocity(
+      Arrow(y[ypos(idx, v_x)], y[ypos(idx, v_y)])
+    );
+    
   }
+}
+
+
+void Simulator::printDataLine ()
+{
+  double totalEnergy = 0.0;
+  
+  for (ParticleConstIterator p = particles.begin(); p != particles.end(); ++p)
+  {
+    (*p)->printDataLine(t, particles);
+    totalEnergy += (*p)->lastComputedEnergy;
+  }
+  
+  dataFile << t << "\t"
+           << totalEnergy << endl;
+}
+
+void Simulator::openDataFile ()
+{
+  string fname(outputDir + "system");
+  dataFile.open(fname.c_str());
+
+  if (dataFile.is_open()) {
+    dataFile << "# system" << endl;
+    dataFile << "# t\tenergy" << endl;
+  } else {
+    cerr << "ERROR: Unable to open output file for writing (" << fname << ")!" << endl;
+    exit(2);
+  }
+}
+
+void Simulator::closeDataFile ()
+{
+  dataFile.close();
 }
 
 size_t ypos (size_t index, ParticleProperty prop) {
@@ -150,22 +192,22 @@ int func (double /*t*/, const double y [], double dy_dt [], void* params) {
 int jac (double /*t*/, const double /*y*/[], double *df_dy, double df_dt[], void *params)
 {
   Params *p = (Params *) params;
-
+  
   size_t dof = Simulator::dofParticle * p->particles->size();
-
+  
   gsl_matrix_view df_dy_mat = gsl_matrix_view_array(df_dy, dof, dof);
   gsl_matrix* m = &df_dy_mat.matrix;
-
+  
   /* Most matrix elements are zero */
   gsl_matrix_set_zero(m);
-
+  
   for(size_t idx = 0; idx < p->particles->size(); ++idx)
   {
     /* d(dr/dt)/dv = 1.0 */
     gsl_matrix_set(m, ypos(idx, r_x), ypos(idx, v_x), 1.0);
     gsl_matrix_set(m, ypos(idx, r_y), ypos(idx, v_y), 1.0);
   }
-
+  
   fill(df_dt, df_dt + dof, 0.0);
 
   return GSL_SUCCESS;
