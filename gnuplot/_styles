@@ -1,0 +1,5 @@
+# planet styles
+set style line 1 ps 6 pt 7 # sun
+set style line 2 ps 3 pt 7 # jupiter
+set style line 3 ps 2 pt 7 # trojans
+set style line 4 ps 2 pt 7 # greeks

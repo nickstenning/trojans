@@ -23,7 +23,7 @@ void Particle::setPosition (const Point& pos)
 
 Arrow Particle::getVelocity () { return v; }
 
-void Particle::setVelocity (const Arrow& vel) 
+void Particle::setVelocity (const Arrow& vel)
 {
   if (isFixed) { return; }
   v = vel;
@@ -34,7 +34,7 @@ Arrow Particle::computeAcceleration (const ParticleList& particles)
   if (isFixed) {
     return Arrow(0.0, 0.0);
   }
-  
+
   Arrow accel, distance;
 
   for (ParticleConstIterator p = particles.begin(); p != particles.end(); ++p)
@@ -53,7 +53,7 @@ double Particle::computeEnergy (const ParticleList& particles)
   if (isFixed) {
     return 0.0;
   }
-  
+
   double energy = 0.0;
   Arrow distance;
 
@@ -81,7 +81,7 @@ void Particle::openDataFile (const string outputDir)
   if (dataFile.is_open()) {
     dataFile << "# " << name << endl;
     dataFile << dataFileHeader() << endl;
-    if (isFixed) { 
+    if (isFixed) {
       dataFile << r.x << "\t" << r.y << endl;
     }
   } else {

@@ -1,0 +1,24 @@
+load d.'/gnuplot/_anim'
+load d.'/gnuplot/_styles'
+
+set size ratio -1 # scale 1:1
+set macros
+
+r = 8
+
+set xrange [-r:r]
+set yrange [-r:r]
+
+t = 0
+
+# 'every 1::t::t' plots only the 't'th point.
+# 'every 10::0::t' plots every 10th point from 0 to the 't'th point.
+
+point = "every 1::t::t u 2:3 w p"
+
+plot 'sun'     u 1:2 ls 1 t "Sun", \
+     'jupiter' @point ls 2 t "Jupiter", \
+     'trojans' @point ls 3 t "Trojans", \
+     'greeks'  @point ls 4 t "Greeks"
+
+pause -1

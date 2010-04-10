@@ -1,4 +1,5 @@
-load 'anim'
+load d.'/gnuplot/_anim'
+load d.'/gnuplot/_styles'
 
 set size ratio -1 # scale 1:1
 
@@ -15,25 +16,18 @@ t = 0
 T = 1000 # Should match numFrames
 pauseTime = 0.01
 
-# planet styles
-set style line 1 ps 6 pt 7 # sun
-set style line 2 ps 3 pt 7 # jupiter
-set style line 3 ps 1 pt 7 # trojans
-set style line 4 ps 1 pt 7 # greeks
-
 # 'every 1::t::t' plots only the 't'th point.
 # 'every 10::0::t' plots every 10th point from 0 to the 't'th point.
 
 point = "every 1::t::t u 2:3 w p"
-trajectory = "every 1::(t > 50 ? t - 50 : 0)::t u 2:3 w l"
+trajectory = "every 1::(t > 30 ? t - 30 : 0)::t u 2:3 w l"
 
 plot 'sun'     u 1:2 ls 1, \
      'jupiter' @point ls 2, \
-     'jupiter' @trajectory ls 2
-
-     # 'trojans' @point ls 3, \
-     # 'greeks'  @point ls 4, \
-     # 'trojans' @trajectory ls 3, \
-     # 'greeks'  @trajectory ls 4
+     'jupiter' @trajectory ls 2, \
+     'trojans' @point ls 3, \
+     'greeks'  @point ls 4, \
+     'trojans' @trajectory ls 3, \
+     'greeks'  @trajectory ls 4
 
 load d.'/gnuplot/_timestep'

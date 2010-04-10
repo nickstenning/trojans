@@ -1,12 +1,10 @@
 set size ratio -1 # scale 1:1
 
-# planet styles
-set style line 1 ps 6 pt 7 # sun
-set style line 2 ps 3 pt 7 # jupiter
+load d.'/gnuplot/_styles'
 
 plot 'sun' u 1:2 ls 1 t "Sun", \
-     'jupiter' u 2:3 w l ls 2 t "Jupiter"
-
-     # d.'/trojans' u 2:3 w l ls 3
+     'jupiter' u 2:3 w l ls 2 t "Jupiter", \
+     'trojans' u 2:3 w l ls 3 t "Trojans", \
+     'greeks' u 2:3 w l ls 4 t "Greeks"
 
 pause -1
