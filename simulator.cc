@@ -16,6 +16,7 @@ Simulator::Simulator (string od) : outputDir(od)
 Simulator::~Simulator () {
   for (ParticleList::iterator p = particles.begin(); p != particles.end(); ++p) {
     (*p)->closeDataFile();
+    delete *p;
   }
   closeDataFile();
 }

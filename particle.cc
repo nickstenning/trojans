@@ -7,6 +7,8 @@ using namespace std;
 // = Particle =
 // ============
 
+Particle::Particle () {}
+
 Particle::Particle (string n, const double m, Point r0 = Point(), Arrow v0 = Arrow())
 : name(n), mass(m), r(r0), v(v0)
 {
@@ -127,6 +129,21 @@ string Particle::dataFileHeader () const
 
 ostream& operator<< (ostream &os, const Particle& obj)
 {
-  os << "<Particle " << obj.name << " r:" << obj.r << " v:" << obj.v << ">";
+  os << "<Particle " << obj.name;
+  os << " m:" << obj.mass;
+  os << " r:" << obj.r;
+  if (obj.isFixed) { 
+    os << " fixed";
+  } else {
+    os << " v:" << obj.v;
+  }
+  os << ">";
   return os;
+}
+
+istream& operator>> (istream &is, Particle& obj)
+{
+  is >> boolalpha;
+  is >> obj.name >> obj.mass >> obj.r.x >> obj.r.y >> obj.v.x >> obj.v.y >> obj.isFixed;
+  return is;
 }

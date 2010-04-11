@@ -18,7 +18,9 @@ typedef ParticleList::const_iterator ParticleConstIterator;
 
 class Particle
 {
+
 public:
+  Particle ();
   Particle (std::string name, double mass, Point x0, Arrow v0);
   ~Particle() {};
 
@@ -37,10 +39,11 @@ public:
 
   bool operator== (const Particle& rhs);
   bool operator!= (const Particle& rhs);
-
+  
   std::string dataFileHeader() const;
 
   friend std::ostream& operator<< (std::ostream& os, const Particle& p);
+  friend std::istream& operator>> (std::istream& is, Particle& p);
 
   bool isFixed;
   double lastComputedEnergy;

@@ -37,32 +37,25 @@ int main (int argc, char * const argv [])
     cerr << setprecision(9);
     
     // Work out how long the field for frame number should be.
-    stringstream tmp;
+    ostringstream tmp;
     tmp << numFrames;
     frameStrSize = tmp.str().size();
     
     // Create new simulator with output directory specified on the command line.
     Simulator sim(argv[1]);
 
-    double trojAngle = (C::pi / 3.0);
-
-    Particle sun("sun", 1.0, Point(), Arrow());
-    sun.isFixed = true;
+    string s;
     
-    Particle jup("jupiter", 0.001, Point(0, Rjup), Arrow(Vjup, 0)); // 2.757 AU/year is plausible.
-    Particle tro("trojans", 0,
-                 Point(Rjup * sin(trojAngle),  Rjup * cos(trojAngle)),
-                 Arrow(Vjup * cos(trojAngle), -Vjup * sin(trojAngle)));
-    Particle gre("greeks", 0,
-                 Point(-Rjup * sin(trojAngle), Rjup * cos(trojAngle)),
-                 Arrow( Vjup * cos(trojAngle), Vjup * sin(trojAngle)));
-
-
-    sim.addParticle(sun);
-    sim.addParticle(jup);
-    sim.addParticle(tro);
-    sim.addParticle(gre);
-
+    while (getline(cin, s)) {
+      if (s[0] != '#') { // ignore comments
+        Particle* p = new Particle;
+        istringstream ss(s);
+        if ( ss >> *p ) {
+          sim.addParticle(*p);
+        }
+      }
+    }
+    
     try
     {
       cerr << sim << endl << endl;
