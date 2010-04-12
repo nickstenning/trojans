@@ -9,32 +9,11 @@ using namespace std;
 
 Particle::Particle () {}
 
-Particle::Particle (const Particle& obj) 
-{
-  *this = obj;
-}
-
 Particle::Particle (string n, const double m, Point r0 = Point(), Arrow v0 = Arrow(), bool fixed = false)
 : name(n), mass(m), r(r0), v(v0), isFixed(fixed)
 {}
 
-Particle::~Particle ()
-{
-  if (dataFile.is_open()) { dataFile.close(); }
-}
-
-// We must define our own assignment operator and copy
-// constructor so that copying an ostream doesn't cause
-// issues.
-Particle& Particle::operator= (const Particle& obj) 
-{
-  name = obj.name;
-  mass = obj.mass;
-  r = obj.r;
-  v = obj.v;
-  isFixed = obj.isFixed;
-  return *this;
-}
+string Particle::getName () const { return name; }
 
 Point Particle::getPosition () const { return r; }
 
@@ -98,43 +77,6 @@ double Particle::computeEnergy (ParticleList& particles)
   return energy;
 }
 
-void Particle::openDataFile (string outputDir)
-{
-  string fname(outputDir + name);
-  dataFile.open(fname.c_str());
-
-  if (dataFile.is_open()) {
-    dataFile << "# " << name << endl;
-    dataFile << dataFileHeader() << endl;
-    if (isFixed) {
-      dataFile << r.x << "\t" << r.y << endl;
-      dataFile.close();
-    }
-  } else {
-    cerr << "ERROR: Unable to open output file for writing (" << fname << ")!" << endl;
-    exit(2);
-  }
-  
-  cout << "is " << name << " data file open? " << dataFile.is_open() << endl;
-}
-
-void Particle::printDataLine (double t)
-{ 
-  cout << "is " << name << " data file open? " << dataFile.is_open() << endl;
-  
-  if (isFixed) { return; }
-
-  if (!dataFile.is_open()) {
-    cerr << name << " datafile not open!" << endl;
-    return;
-  }
-
-  dataFile << t << "\t"
-           << r.x << "\t" << r.y << "\t"
-           << v.x << "\t" << v.y << "\t"
-           << lastComputedAccel.x << "\t" << lastComputedAccel.y << "\t"
-           << lastComputedEnergy << endl;
-}
 
 bool Particle::operator== (const Particle& rhs)
 {
@@ -146,13 +88,33 @@ bool Particle::operator!= (const Particle& rhs)
   return !(*this == rhs);
 }
 
-string Particle::dataFileHeader () const
-{
+void Particle::printHeader (ofstream& ofs) const
+{  
+  ofs << "# " << name << endl;
+  
   if (isFixed) {
-    return "# r_x\tr_y";
+    ofs << "# r_x\tr_y";
+  } else {
+    ofs << "# t\tr_x\tr_y\tv_x\tv_y\ta_x\ta_y\tenergy";
   }
-  return "# t\tr_x\tr_y\tv_x\tv_y\ta_x\ta_y\tenergy";
+
+  ofs << endl;
 }
+
+void Particle::printData (const double& t, ofstream& ofs) const
+{ 
+  if (isFixed) {
+    ofs << r.x << "\t" << r.y << endl;
+    ofs.close(); // Won't come round again.
+  } else {
+    ofs << t << "\t"
+        << r.x << "\t" << r.y << "\t"
+        << v.x << "\t" << v.y << "\t"
+        << lastComputedAccel.x << "\t" << lastComputedAccel.y << "\t"
+        << lastComputedEnergy << endl;
+  }
+}
+
 
 ostream& operator<< (ostream &os, const Particle& obj)
 {

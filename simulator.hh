@@ -7,7 +7,6 @@
 #include <vector>
 #include <string>
 #include <fstream>
-#include <memory>
 
 #include "point.hh"
 #include "particle.hh"
@@ -40,12 +39,13 @@ public:
   static const size_t dofParticle = 4;
   virtual size_t degreesOfFreedom() const;
   
-  void openDataFile ();
-  void printDataLine ();
+  void openDataFiles ();
+  void printData ();
 protected:
   ParticleList particles;
   std::string outputDir;
   std::ofstream dataFile;
+  std::vector<std::ofstream*> particleDataFiles;
   double t;
   double dt;
 

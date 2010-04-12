@@ -9,26 +9,31 @@ Simulator::Simulator (string od) : outputDir(od)
   }
 
   system(("mkdir -p " + outputDir).c_str());
-
-  openDataFile();
 }
 
 Simulator::~Simulator () {
   if (dataFile.is_open()) { dataFile.close(); }
+  
+  for (vector<ofstream*>::iterator f = particleDataFiles.begin(); f != particleDataFiles.end(); ++f) {
+    if ((*f)->is_open()) { (*f)->close(); }
+    delete *f;
+  } 
 }
 
 int Simulator::addParticle (Particle &p)
 {
   particles.push_back(p);
-  particles.back().openDataFile(outputDir);
   return particles.size();
 }
 
 void Simulator::run (double tMax, size_t numFrames,
                      void (*onFrameFunc)(size_t)) throw(string)
 {
+  openDataFiles();
+
   Params params;
   params.particles = &particles;
+
 
   size_t dof = degreesOfFreedom();
 
@@ -68,7 +73,7 @@ void Simulator::run (double tMax, size_t numFrames,
         updateParticlesFromArray(y);
       }
 
-      printDataLine();
+      printData();
       onFrameFunc(frame);
   }
 
@@ -124,23 +129,42 @@ void Simulator::updateParticlesFromArray(const double y [])
 }
 
 
-void Simulator::printDataLine ()
+void Simulator::printData ()
 {
   double totalEnergy = 0.0;
 
   for (ParticleIterator p = particles.begin(); p != particles.end(); ++p) {
+    ParticleList::difference_type idx = p - particles.begin();
+
     totalEnergy += p->computeEnergy(particles);
-    p->printDataLine(t);
+    
+    if (particleDataFiles.at(idx)->is_open()) {
+      p->printData(t, *particleDataFiles.at(idx));
+    }
   }
 
-  dataFile << t << "\t"
-           << totalEnergy << endl;
+  dataFile << t << "\t" << totalEnergy << endl;
 }
 
-void Simulator::openDataFile ()
+void Simulator::openDataFiles ()
 {
+  particleDataFiles.clear();
+  
+  for (ParticleConstIterator p = particles.begin(); p != particles.end(); ++p) {
+    string fname(outputDir + p->getName());
+    ofstream* df = new ofstream(fname.c_str(), ios::out | ios::trunc);
+    particleDataFiles.push_back(df);
+    
+    if (df->is_open()) {
+      p->printHeader(*df);
+    } else {
+      cerr << "ERROR: Unable to open output file for writing (" << fname << ")!" << endl;
+      exit(2);
+    }
+  }
+  
   string fname(outputDir + "system");
-  dataFile.open(fname.c_str());
+  dataFile.open(fname.c_str(), ios::out | ios::trunc);
 
   if (dataFile.is_open()) {
     dataFile << "# system" << endl;
