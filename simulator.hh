@@ -41,7 +41,6 @@ public:
   virtual size_t degreesOfFreedom() const;
   
   void openDataFile ();
-  void closeDataFile ();
   void printDataLine ();
 protected:
   ParticleList particles;

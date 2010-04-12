@@ -12,7 +12,7 @@
 
 class Particle;
 
-typedef std::vector<Particle*> ParticleList;
+typedef std::vector<Particle> ParticleList;
 typedef ParticleList::iterator ParticleIterator;
 typedef ParticleList::const_iterator ParticleConstIterator;
 
@@ -21,21 +21,23 @@ class Particle
 
 public:
   Particle ();
-  Particle (std::string name, double mass, Point x0, Arrow v0);
-  ~Particle() {};
+  Particle (const Particle& obj);
+  Particle (std::string name, double mass, Point x0, Arrow v0, bool fixed);
+  ~Particle ();
 
-  Point getPosition ();
+  Particle& operator= (const Particle& obj);
+
+  Point getPosition () const;
   void setPosition (const Point& pos);
 
-  Arrow getVelocity ();
+  Arrow getVelocity () const;
   void setVelocity (const Arrow& vel);
 
-  Arrow computeAcceleration (const ParticleList& particles);
-  double computeEnergy (const ParticleList& particles);
+  Arrow computeAcceleration (ParticleList& particles);
+  double computeEnergy (ParticleList& particles);
 
   void openDataFile (const std::string outputDir);
-  void closeDataFile ();
-  void printDataLine (double time, const ParticleList& particles);
+  void printDataLine (double time);
 
   bool operator== (const Particle& rhs);
   bool operator!= (const Particle& rhs);
@@ -45,7 +47,6 @@ public:
   friend std::ostream& operator<< (std::ostream& os, const Particle& p);
   friend std::istream& operator>> (std::istream& is, Particle& p);
 
-  bool isFixed;
   double lastComputedEnergy;
   Arrow lastComputedAccel;
 protected:
@@ -53,6 +54,7 @@ protected:
   double mass;
   Point r; // position vector
   Arrow v; // velocity vector
+  bool isFixed;
 
   std::ofstream dataFile;
 };

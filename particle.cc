@@ -9,13 +9,34 @@ using namespace std;
 
 Particle::Particle () {}
 
-Particle::Particle (string n, const double m, Point r0 = Point(), Arrow v0 = Arrow())
-: name(n), mass(m), r(r0), v(v0)
+Particle::Particle (const Particle& obj) 
 {
-  isFixed = false;
+  *this = obj;
 }
 
-Point Particle::getPosition () { return r; }
+Particle::Particle (string n, const double m, Point r0 = Point(), Arrow v0 = Arrow(), bool fixed = false)
+: name(n), mass(m), r(r0), v(v0), isFixed(fixed)
+{}
+
+Particle::~Particle ()
+{
+  if (dataFile.is_open()) { dataFile.close(); }
+}
+
+// We must define our own assignment operator and copy
+// constructor so that copying an ostream doesn't cause
+// issues.
+Particle& Particle::operator= (const Particle& obj) 
+{
+  name = obj.name;
+  mass = obj.mass;
+  r = obj.r;
+  v = obj.v;
+  isFixed = obj.isFixed;
+  return *this;
+}
+
+Point Particle::getPosition () const { return r; }
 
 void Particle::setPosition (const Point& pos)
 {
@@ -23,7 +44,7 @@ void Particle::setPosition (const Point& pos)
   r = pos;
 }
 
-Arrow Particle::getVelocity () { return v; }
+Arrow Particle::getVelocity () const { return v; }
 
 void Particle::setVelocity (const Arrow& vel)
 {
@@ -31,7 +52,7 @@ void Particle::setVelocity (const Arrow& vel)
   v = vel;
 }
 
-Arrow Particle::computeAcceleration (const ParticleList& particles)
+Arrow Particle::computeAcceleration (ParticleList& particles)
 {
   if (isFixed) {
     return Arrow(0.0, 0.0);
@@ -41,9 +62,9 @@ Arrow Particle::computeAcceleration (const ParticleList& particles)
 
   for (ParticleConstIterator p = particles.begin(); p != particles.end(); ++p)
   {
-    if (**p != *this) { // Don't calculate acceleration due to yourself!
-      distance = (*p)->getPosition() - this->getPosition();
-      accel += (C::G_scaled * (*p)->mass * distance) / pow(distance.norm(), 3);
+    if (&(*p) != this) { // Don't calculate acceleration due to yourself!
+      distance = p->getPosition() - this->getPosition();
+      accel += (C::G_scaled * p->mass * distance) / pow(distance.norm(), 3);
     }
   }
   
@@ -52,7 +73,7 @@ Arrow Particle::computeAcceleration (const ParticleList& particles)
   return accel;
 }
 
-double Particle::computeEnergy (const ParticleList& particles)
+double Particle::computeEnergy (ParticleList& particles)
 {
   if (isFixed) {
     return 0.0;
@@ -63,9 +84,9 @@ double Particle::computeEnergy (const ParticleList& particles)
 
   // PE
   for (ParticleConstIterator p = particles.begin(); p != particles.end(); ++p) {
-    if (**p != *this) { // Don't calculate acceleration due to yourself!
-      distance = (*p)->getPosition() - this->getPosition();
-      energy += (C::G_scaled * (*p)->mass * mass) / distance.norm();
+    if (&(*p) != this) { // Don't calculate acceleration due to yourself!
+      distance = p->getPosition() - this->getPosition();
+      energy += (C::G_scaled * p->mass * mass) / distance.norm();
     }
   }
 
@@ -77,7 +98,7 @@ double Particle::computeEnergy (const ParticleList& particles)
   return energy;
 }
 
-void Particle::openDataFile (const string outputDir)
+void Particle::openDataFile (string outputDir)
 {
   string fname(outputDir + name);
   dataFile.open(fname.c_str());
@@ -87,26 +108,32 @@ void Particle::openDataFile (const string outputDir)
     dataFile << dataFileHeader() << endl;
     if (isFixed) {
       dataFile << r.x << "\t" << r.y << endl;
+      dataFile.close();
     }
   } else {
     cerr << "ERROR: Unable to open output file for writing (" << fname << ")!" << endl;
     exit(2);
   }
+  
+  cout << "is " << name << " data file open? " << dataFile.is_open() << endl;
 }
 
-void Particle::closeDataFile ()
-{
-  dataFile.close();
-}
-
-void Particle::printDataLine (double t, const ParticleList& particles)
-{
+void Particle::printDataLine (double t)
+{ 
+  cout << "is " << name << " data file open? " << dataFile.is_open() << endl;
+  
   if (isFixed) { return; }
+
+  if (!dataFile.is_open()) {
+    cerr << name << " datafile not open!" << endl;
+    return;
+  }
+
   dataFile << t << "\t"
            << r.x << "\t" << r.y << "\t"
            << v.x << "\t" << v.y << "\t"
            << lastComputedAccel.x << "\t" << lastComputedAccel.y << "\t"
-           << computeEnergy(particles) << endl;
+           << lastComputedEnergy << endl;
 }
 
 bool Particle::operator== (const Particle& rhs)

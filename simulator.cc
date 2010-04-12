@@ -14,17 +14,13 @@ Simulator::Simulator (string od) : outputDir(od)
 }
 
 Simulator::~Simulator () {
-  for (ParticleList::iterator p = particles.begin(); p != particles.end(); ++p) {
-    (*p)->closeDataFile();
-    delete *p;
-  }
-  closeDataFile();
+  if (dataFile.is_open()) { dataFile.close(); }
 }
 
 int Simulator::addParticle (Particle &p)
 {
-  p.openDataFile(outputDir);
-  particles.push_back(&p);
+  particles.push_back(p);
+  particles.back().openDataFile(outputDir);
   return particles.size();
 }
 
@@ -37,10 +33,10 @@ void Simulator::run (double tMax, size_t numFrames,
   size_t dof = degreesOfFreedom();
 
   // Embedded Runge-Kutta Prince-Dormand (8, 9) stepping function
-  // gsl_odeiv_step* s = gsl_odeiv_step_alloc(gsl_odeiv_step_rk8pd, dof);
+  gsl_odeiv_step* s = gsl_odeiv_step_alloc(gsl_odeiv_step_rk8pd, dof);
 
   // Embedded Runge-Kutta-Fehlberg (4, 5) stepping function
-  gsl_odeiv_step* s = gsl_odeiv_step_alloc(gsl_odeiv_step_rk8pd, dof);
+  // gsl_odeiv_step* s = gsl_odeiv_step_alloc(gsl_odeiv_step_rkf45, dof);
 
   gsl_odeiv_control* c = gsl_odeiv_control_y_new(1e-20, 0);
   gsl_odeiv_evolve* e = gsl_odeiv_evolve_alloc(dof);
@@ -93,7 +89,7 @@ ostream& operator<< (ostream &os, const Simulator& obj)
 {
   os << "<Simulator particles:[" << endl;
   for (ParticleConstIterator p = obj.particles.begin(); p != obj.particles.end(); ++p) {
-    os << "  " << **p << "," << endl;
+    os << "  " << *p << "," << endl;
   }
   os << "]>";
   return os;
@@ -103,8 +99,8 @@ void Simulator::setArrayFromParticles(double y [])
 {
   for (ParticleConstIterator p = particles.begin(); p != particles.end(); ++p) {
     ParticleList::difference_type idx = p - particles.begin();
-    Arrow vel = (*p)->getVelocity();
-    Point pos = (*p)->getPosition();
+    Arrow vel = p->getVelocity();
+    Point pos = p->getPosition();
     y[ypos(idx, v_x)] = vel.x;
     y[ypos(idx, v_y)] = vel.y;
     y[ypos(idx, r_x)] = pos.x;
@@ -117,10 +113,10 @@ void Simulator::updateParticlesFromArray(const double y [])
   for (ParticleIterator p = particles.begin(); p != particles.end(); ++p) {
     ParticleList::difference_type idx = p - particles.begin();
 
-    (*p)->setPosition(
+    p->setPosition(
       Point(y[ypos(idx, r_x)], y[ypos(idx, r_y)])
     );
-    (*p)->setVelocity(
+    p->setVelocity(
       Arrow(y[ypos(idx, v_x)], y[ypos(idx, v_y)])
     );
 
@@ -132,9 +128,9 @@ void Simulator::printDataLine ()
 {
   double totalEnergy = 0.0;
 
-  for (ParticleConstIterator p = particles.begin(); p != particles.end(); ++p) {
-    (*p)->printDataLine(t, particles);
-    totalEnergy += (*p)->lastComputedEnergy;
+  for (ParticleIterator p = particles.begin(); p != particles.end(); ++p) {
+    totalEnergy += p->computeEnergy(particles);
+    p->printDataLine(t);
   }
 
   dataFile << t << "\t"
@@ -155,11 +151,6 @@ void Simulator::openDataFile ()
   }
 }
 
-void Simulator::closeDataFile ()
-{
-  dataFile.close();
-}
-
 size_t ypos (size_t index, ParticleProperty prop) {
   return Simulator::dofParticle * index + prop;
 }
@@ -168,7 +159,7 @@ int func (double /*t*/, const double y [], double dy_dt [], void* params) {
   Params *p = (Params *) params;
 
   for(size_t idx = 0; idx < p->particles->size(); ++idx) {
-    Arrow accel = p->particles->at(idx)->computeAcceleration(*(p->particles));
+    Arrow accel = p->particles->at(idx).computeAcceleration(*(p->particles));
 
     // dv/dt = a --> dx_1/dt = accel
     dy_dt[ypos(idx, v_x)] = accel.x;

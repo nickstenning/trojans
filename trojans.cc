@@ -48,10 +48,10 @@ int main (int argc, char * const argv [])
     
     while (getline(cin, s)) {
       if (s[0] != '#') { // ignore comments
-        Particle* p = new Particle;
+        Particle p;
         istringstream ss(s);
-        if ( ss >> *p ) {
-          sim.addParticle(*p);
+        if ( ss >> p ) {
+          sim.addParticle(p);
         }
       }
     }
