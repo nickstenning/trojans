@@ -1,5 +1,9 @@
-initialEnergy = `cat system | grep -v '^#' | cut -f2 | head -1`
+initialEnergy = `cat system | grep -v '^#' | cut -f2 2>/dev/null | head -1`
 
-plot 'system' u 1:($2 / initialEnergy) w l t "System energy (relative to starting energy)"
+set nokey
+set xlabel "time / years"
+set ylabel "E_{system} / initial E_{system}"
+
+plot 'system' u 1:($2 / initialEnergy) w l
 
 pause -1
