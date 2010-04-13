@@ -14,11 +14,11 @@
 enum ParticleProperty { r_x = 0, r_y = 1, v_x = 2, v_y = 3 };
 
 struct Params {
-  ParticleList* particles;
+  Particles const* particles;
 };
 
-int func (double t, const double y[], double dy_dt[], void *params);
-int jac (double t, const double y[], double *dfdy, double dfdt[], void *params);
+int func (double t,  double const y[], double dy_dt[], void* params);
+int jac (double t, double const y[], double* dfdy, double dfdt[], void* params);
 size_t ypos (size_t index, ParticleProperty prop);
 
 class Simulator
@@ -28,13 +28,11 @@ public:
   ~Simulator ();
 
   int addParticle (Particle& p);
+  void updateParticle (Particle& p);
+  
+  void run (double tMax, size_t numFrames, void (*onFrameFunc)(size_t)) throw(std::string);
 
-  void run (double tMax, 
-            size_t numFrames, 
-            void(*onFrameFunc)(size_t)) throw(std::string);
-
-  friend class Particle;
-  friend std::ostream& operator<< (std::ostream& os, const Simulator& s);
+  friend std::ostream& operator<< (std::ostream& os, Simulator const& s);
 
   static const size_t dofParticle = 4;
   virtual size_t degreesOfFreedom() const;
@@ -42,7 +40,7 @@ public:
   void openDataFiles ();
   void printData ();
 protected:
-  ParticleList particles;
+  Particles particles;
   std::string outputDir;
   std::ofstream dataFile;
   std::vector<std::ofstream*> particleDataFiles;
@@ -50,7 +48,7 @@ protected:
   double dt;
 
   void setArrayFromParticles(double y []);
-  void updateParticlesFromArray(const double y []);
+  void setParticlesFromArray(double const y []);
 };
 
 #endif /* SIMULATOR_HH_ */

@@ -10,32 +10,34 @@
 #include <iostream>
 #include <fstream>
 
-class Particle;
-
-typedef std::vector<Particle> ParticleList;
-typedef ParticleList::iterator ParticleIterator;
-typedef ParticleList::const_iterator ParticleConstIterator;
-
 class Particle
 {
-
 public:
   Particle ();
   Particle (std::string name, double mass, Point x0, Arrow v0, bool fixed);
+  
+  std::string const& name() const;
+  void name(std::string const& newName);
 
-  std::string getName () const;
+  double const& mass() const;
+  void mass(double const& newMass);
+  
+  double const& energy() const;
+  void energy(double const& newEnergy);
+  
+  Point const& position() const;
+  void position(Point const& newPosition);
+  
+  Arrow const& velocity() const;
+  void velocity(Point const& newVelocity);
+  
+  Arrow const& acceleration() const;
+  void acceleration(Point const& newAcceleration);
+  
+  bool const& fixed() const;
 
-  Point getPosition () const;
-  void setPosition (const Point& pos);
-
-  Arrow getVelocity () const;
-  void setVelocity (const Arrow& vel);
-
-  Arrow computeAcceleration (ParticleList& particles);
-  double computeEnergy (ParticleList& particles);
-
-  bool operator== (const Particle& rhs);
-  bool operator!= (const Particle& rhs);
+  bool operator== (const Particle& rhs) const;
+  bool operator!= (const Particle& rhs) const;
   
   void printHeader (std::ofstream& ofs) const;
   void printData (const double& time, std::ofstream& ofs) const;
@@ -43,15 +45,17 @@ public:
   friend std::ostream& operator<< (std::ostream& os, const Particle& p);
   friend std::istream& operator>> (std::istream& is, Particle& p);
 
-  double lastComputedEnergy;
-  Arrow lastComputedAccel;
-  
 protected:
-  std::string name;
-  double mass;
-  Point r; // position vector
-  Arrow v; // velocity vector
-  bool isFixed;
+  std::string name_;
+  double mass_;
+  double energy_;
+  Point position_;
+  Arrow velocity_;
+  Arrow acceleration_;
+  bool fixed_;
 };
+
+typedef std::vector<Particle> Particles;
+
 #endif
 

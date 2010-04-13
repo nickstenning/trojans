@@ -3,96 +3,67 @@
 
 using namespace std;
 
-// ============
-// = Particle =
-// ============
-
 Particle::Particle () {}
 
-Particle::Particle (string n, const double m, Point r0 = Point(), Arrow v0 = Arrow(), bool fixed = false)
-: name(n), mass(m), r(r0), v(v0), isFixed(fixed)
+Particle::Particle (string n, const double m, 
+                    Point r = Point(), Arrow v = Arrow(), 
+                    bool f = false)
+: name_(n), mass_(m), position_(r), velocity_(v), fixed_(f)
 {}
 
-string Particle::getName () const { return name; }
+string const& Particle::name () const { return name_; }
 
-Point Particle::getPosition () const { return r; }
-
-void Particle::setPosition (const Point& pos)
-{
-  if (isFixed) { return; }
-  r = pos;
+void Particle::name (const string& newName) {
+  name_ = newName;
 }
 
-Arrow Particle::getVelocity () const { return v; }
+double const& Particle::mass () const { return mass_; }
 
-void Particle::setVelocity (const Arrow& vel)
-{
-  if (isFixed) { return; }
-  v = vel;
+void Particle::mass (const double& newMass) {
+  mass_ = newMass;
 }
 
-Arrow Particle::computeAcceleration (ParticleList& particles)
-{
-  if (isFixed) {
-    return Arrow(0.0, 0.0);
-  }
+double const& Particle::energy () const { return energy_; }
 
-  Arrow accel, distance;
-
-  for (ParticleConstIterator p = particles.begin(); p != particles.end(); ++p)
-  {
-    if (&(*p) != this) { // Don't calculate acceleration due to yourself!
-      distance = p->getPosition() - this->getPosition();
-      accel += (C::G_scaled * p->mass * distance) / pow(distance.norm(), 3);
-    }
-  }
-  
-  lastComputedAccel = accel;
-
-  return accel;
+void Particle::energy (const double& newEnergy) {
+  energy_ = newEnergy;
 }
 
-double Particle::computeEnergy (ParticleList& particles)
-{
-  if (isFixed) {
-    return 0.0;
-  }
+Point const& Particle::position () const { return position_; }
 
-  double energy = 0.0;
-  Arrow distance;
-
-  // PE
-  for (ParticleConstIterator p = particles.begin(); p != particles.end(); ++p) {
-    if (&(*p) != this) { // Don't calculate acceleration due to yourself!
-      distance = p->getPosition() - this->getPosition();
-      energy += (C::G_scaled * p->mass * mass) / distance.norm();
-    }
-  }
-
-  // KE
-  energy += (mass * v.normsq()) / 2.0;
-
-  lastComputedEnergy = energy;
-
-  return energy;
+void Particle::position (const Point& newPosition) {
+  if (fixed_) { return; }
+  position_ = newPosition;
 }
 
+Arrow const& Particle::velocity () const { return velocity_; }
 
-bool Particle::operator== (const Particle& rhs)
-{
-  return (name == rhs.name);
+void Particle::velocity (Arrow const& newVelocity) {
+  if (fixed_) { return; }
+  velocity_ = newVelocity;
 }
 
-bool Particle::operator!= (const Particle& rhs)
-{
+Arrow const& Particle::acceleration () const { return acceleration_; }
+
+void Particle::acceleration (Arrow const& newAcceleration) {
+  if (fixed_) { return; }
+  acceleration_ = newAcceleration;
+}
+
+bool const& Particle::fixed () const { return fixed_; }
+
+bool Particle::operator== (Particle const& rhs) const {
+  return (name_ == rhs.name_);
+}
+
+bool Particle::operator!= (Particle const& rhs) const {
   return !(*this == rhs);
 }
 
-void Particle::printHeader (ofstream& ofs) const
-{  
-  ofs << "# " << name << endl;
+void Particle::printHeader (ofstream& ofs) const {  
+  ofs << "# " << name_ << endl;
   
-  if (isFixed) {
+  if (fixed_) {
     ofs << "# r_x\tr_y";
   } else {
     ofs << "# t\tr_x\tr_y\tv_x\tv_y\ta_x\ta_y\tenergy";
@@ -101,38 +72,37 @@ void Particle::printHeader (ofstream& ofs) const
   ofs << endl;
 }
 
-void Particle::printData (const double& t, ofstream& ofs) const
-{ 
-  if (isFixed) {
-    ofs << r.x << "\t" << r.y << endl;
+void Particle::printData (const double& t, ofstream& ofs) const { 
+  if (fixed_) {
+    ofs << position_.x << "\t" << position_.y << endl;
     ofs.close(); // Won't come round again.
   } else {
     ofs << t << "\t"
-        << r.x << "\t" << r.y << "\t"
-        << v.x << "\t" << v.y << "\t"
-        << lastComputedAccel.x << "\t" << lastComputedAccel.y << "\t"
-        << lastComputedEnergy << endl;
+        << position_.x << "\t" << position_.y << "\t"
+        << velocity_.x << "\t" << velocity_.y << "\t"
+        << acceleration_.x << "\t" << acceleration_.y << "\t"
+        << energy_ << endl;
   }
 }
 
-
-ostream& operator<< (ostream &os, const Particle& obj)
-{
-  os << "<Particle " << obj.name;
-  os << " m:" << obj.mass;
-  os << " r:" << obj.r;
-  if (obj.isFixed) { 
+ostream& operator<< (ostream& os, const Particle& p) {
+  os << "<Particle " << p.name_;
+  os << " m:" << p.mass_;
+  os << " r:" << p.position_;
+  if (p.fixed_) { 
     os << " fixed";
   } else {
-    os << " v:" << obj.v;
+    os << " v:" << p.velocity_;
   }
   os << ">";
   return os;
 }
 
-istream& operator>> (istream &is, Particle& obj)
-{
-  is >> boolalpha;
-  is >> obj.name >> obj.mass >> obj.r.x >> obj.r.y >> obj.v.x >> obj.v.y >> obj.isFixed;
+istream& operator>> (istream& is, Particle& p) {
+  is >> boolalpha
+     >> p.name_ >> p.mass_
+     >> p.position_.x >> p.position_.y
+     >> p.velocity_.x >> p.velocity_.y
+     >> p.fixed_;
   return is;
 }

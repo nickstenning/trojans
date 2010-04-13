@@ -13,15 +13,15 @@ double Rjup = 5.2;
 /* tangential velocity of jupiter in a.u./year */
 double Vjup = 2.757;
 /* simulator run time */
-double T = 5 * sqrt(pow(Rjup, 3));
+double T = 100 * sqrt(pow(Rjup, 3));
 /* number of frames to print */
-size_t numFrames = 1000;
+size_t numFrames = 10000;
 
 size_t frameStrSize;
 
 void onframe(size_t frame);
 
-int main (int argc, char * const argv [])
+int main (int argc, char* const argv [])
 {
   if (argc != 2)
   {
@@ -80,13 +80,10 @@ int main (int argc, char * const argv [])
 
 void onframe(size_t frame)
 {
-  if (frame % 10 == 0)
+  if (frame > 0)
   {
-    if (frame > 0)
-    {
-      for (size_t i = 0; i < ((2 * frameStrSize) + 3); ++i) { cerr << '\b'; }
-    }
-
-    cerr << "[" << setw(frameStrSize) << frame << "/" << setw(frameStrSize) << numFrames << "]" << flush;
+    for (size_t i = 0; i < ((2 * frameStrSize) + 3); ++i) { cerr << '\b'; }
   }
+
+  cerr << "[" << setw(frameStrSize) << frame << "/" << setw(frameStrSize) << numFrames << "]" << flush;
 }

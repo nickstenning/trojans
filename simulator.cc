@@ -20,10 +20,35 @@ Simulator::~Simulator () {
   } 
 }
 
-int Simulator::addParticle (Particle &p)
+int Simulator::addParticle (Particle& p)
 {
   particles.push_back(p);
   return particles.size();
+}
+
+void Simulator::updateParticle (Particle& particle) {  
+  if (particle.fixed()) {
+    return;
+  }
+  
+  double energy;
+  Arrow acceleration, distance;
+
+  for (Particles::const_iterator p = particles.begin(); p != particles.end(); ++p)
+  {
+    if (*p != particle) { // Don't calculate acceleration due to this particle.
+      distance = p->position() - particle.position();
+      
+      energy += (C::G_scaled * p->mass() * particle.mass()) / distance.norm();
+      acceleration += (C::G_scaled * p->mass() * distance) / pow(distance.norm(), 3);
+    }
+  }
+  
+  // KE
+  energy += (particle.mass() * particle.velocity().normsq()) / 2.0;
+  
+  particle.acceleration(acceleration);
+  particle.energy(energy);
 }
 
 void Simulator::run (double tMax, size_t numFrames,
@@ -31,9 +56,8 @@ void Simulator::run (double tMax, size_t numFrames,
 {
   openDataFiles();
 
-  Params params;
-  params.particles = &particles;
-
+  Params par;
+  par.particles = &particles;
 
   size_t dof = degreesOfFreedom();
 
@@ -46,23 +70,20 @@ void Simulator::run (double tMax, size_t numFrames,
   gsl_odeiv_control* c = gsl_odeiv_control_y_new(1e-20, 0);
   gsl_odeiv_evolve* e = gsl_odeiv_evolve_alloc(dof);
 
-  gsl_odeiv_system sys = {func, jac, dof, &params};
+  gsl_odeiv_system sys = {func, jac, dof, &par};
 
   double *y = NULL;
   y = new double[dof];
 
-  setArrayFromParticles(y);
-
   t  = 0.0;
   dt = 1e-6;
-
+  
   for (size_t frame = 0; frame < numFrames; ++frame) {
-
-      double tFrame = frame * (tMax / numFrames);
+      double tFrame = (frame + 1) * (tMax / numFrames);
 
       while (t < tFrame) {
-        // setArrayFromParticles(y);
-
+        setArrayFromParticles(y);
+        
         int status = gsl_odeiv_evolve_apply(e, c, s, &sys, &t, tFrame, &dt, y);
 
         if (status != GSL_SUCCESS) {
@@ -70,10 +91,10 @@ void Simulator::run (double tMax, size_t numFrames,
           break;
         }
 
-        updateParticlesFromArray(y);
+        setParticlesFromArray(y);
       }
 
-      printData();
+      printData();      
       onFrameFunc(frame);
   }
 
@@ -90,53 +111,45 @@ size_t Simulator::degreesOfFreedom () const
   return dofParticle * particles.size();
 }
 
-ostream& operator<< (ostream &os, const Simulator& obj)
+ostream& operator<< (ostream &os, Simulator const& s)
 {
   os << "<Simulator particles:[" << endl;
-  for (ParticleConstIterator p = obj.particles.begin(); p != obj.particles.end(); ++p) {
+  for (Particles::const_iterator p = s.particles.begin(); p != s.particles.end(); ++p) {
     os << "  " << *p << "," << endl;
   }
   os << "]>";
   return os;
 }
 
-void Simulator::setArrayFromParticles(double y [])
-{
-  for (ParticleConstIterator p = particles.begin(); p != particles.end(); ++p) {
-    ParticleList::difference_type idx = p - particles.begin();
-    Arrow vel = p->getVelocity();
-    Point pos = p->getPosition();
-    y[ypos(idx, v_x)] = vel.x;
-    y[ypos(idx, v_y)] = vel.y;
-    y[ypos(idx, r_x)] = pos.x;
-    y[ypos(idx, r_y)] = pos.y;
+void Simulator::setArrayFromParticles(double y []) {
+  for (Particles::const_iterator p = particles.begin(); p != particles.end(); ++p) {
+    Particles::difference_type idx = p - particles.begin();
+
+    y[ypos(idx, v_x)] = p->velocity().x;
+    y[ypos(idx, v_y)] = p->velocity().y;
+    y[ypos(idx, r_x)] = p->position().x;
+    y[ypos(idx, r_y)] = p->position().y;
   }
 }
 
-void Simulator::updateParticlesFromArray(const double y [])
-{
-  for (ParticleIterator p = particles.begin(); p != particles.end(); ++p) {
-    ParticleList::difference_type idx = p - particles.begin();
+void Simulator::setParticlesFromArray(double const y []) {
+  for (Particles::iterator p = particles.begin(); p != particles.end(); ++p) {
+    Particles::difference_type idx = p - particles.begin();
 
-    p->setPosition(
-      Point(y[ypos(idx, r_x)], y[ypos(idx, r_y)])
-    );
-    p->setVelocity(
-      Arrow(y[ypos(idx, v_x)], y[ypos(idx, v_y)])
-    );
-
+    p->position(Point(y[ypos(idx, r_x)], y[ypos(idx, r_y)]));
+    p->velocity(Arrow(y[ypos(idx, v_x)], y[ypos(idx, v_y)]));
+    
+    updateParticle(*p);
   }
 }
 
-
-void Simulator::printData ()
-{
+void Simulator::printData () {
   double totalEnergy = 0.0;
 
-  for (ParticleIterator p = particles.begin(); p != particles.end(); ++p) {
-    ParticleList::difference_type idx = p - particles.begin();
+  for (Particles::iterator p = particles.begin(); p != particles.end(); ++p) {
+    Particles::difference_type idx = p - particles.begin();
 
-    totalEnergy += p->computeEnergy(particles);
+    totalEnergy += p->energy();
     
     if (particleDataFiles.at(idx)->is_open()) {
       p->printData(t, *particleDataFiles.at(idx));
@@ -146,12 +159,11 @@ void Simulator::printData ()
   dataFile << t << "\t" << totalEnergy << endl;
 }
 
-void Simulator::openDataFiles ()
-{
+void Simulator::openDataFiles () {
   particleDataFiles.clear();
   
-  for (ParticleConstIterator p = particles.begin(); p != particles.end(); ++p) {
-    string fname(outputDir + p->getName());
+  for (Particles::const_iterator p = particles.begin(); p != particles.end(); ++p) {
+    string fname(outputDir + p->name());
     ofstream* df = new ofstream(fname.c_str(), ios::out | ios::trunc);
     particleDataFiles.push_back(df);
     
@@ -179,15 +191,15 @@ size_t ypos (size_t index, ParticleProperty prop) {
   return Simulator::dofParticle * index + prop;
 }
 
-int func (double /*t*/, const double y [], double dy_dt [], void* params) {
-  Params *p = (Params *) params;
+int func (double /*t*/, double const y [], double dy_dt [], void* params) {
+  Params *par = (Params *) params;
 
-  for(size_t idx = 0; idx < p->particles->size(); ++idx) {
-    Arrow accel = p->particles->at(idx).computeAcceleration(*(p->particles));
-
+  for (Particles::const_iterator p = par->particles->begin(); p != par->particles->end(); ++p) {
+    Particles::difference_type idx = p - par->particles->begin();
+    
     // dv/dt = a --> dx_1/dt = accel
-    dy_dt[ypos(idx, v_x)] = accel.x;
-    dy_dt[ypos(idx, v_y)] = accel.y;
+    dy_dt[ypos(idx, v_x)] = p->acceleration().x;
+    dy_dt[ypos(idx, v_y)] = p->acceleration().y;
 
     // dx/dt = v --> dx_0/dt = x_1
     dy_dt[ypos(idx, r_x)] = y[ypos(idx, v_x)];
@@ -197,11 +209,10 @@ int func (double /*t*/, const double y [], double dy_dt [], void* params) {
   return GSL_SUCCESS;
 }
 
-int jac (double /*t*/, const double /*y*/[], double *df_dy, double df_dt[], void *params)
-{
-  Params *p = (Params *) params;
+int jac (double /*t*/, double const /*y*/[], double* df_dy, double df_dt[], void* params) {
+  Params *par = (Params *) params;
 
-  size_t dof = Simulator::dofParticle * p->particles->size();
+  size_t dof = Simulator::dofParticle * par->particles->size();
 
   gsl_matrix_view df_dy_mat = gsl_matrix_view_array(df_dy, dof, dof);
   gsl_matrix* m = &df_dy_mat.matrix;
@@ -209,7 +220,9 @@ int jac (double /*t*/, const double /*y*/[], double *df_dy, double df_dt[], void
   /* Most matrix elements are zero */
   gsl_matrix_set_zero(m);
 
-  for(size_t idx = 0; idx < p->particles->size(); ++idx) {
+  for (Particles::const_iterator p = par->particles->begin(); p != par->particles->end(); ++p) {
+    Particles::difference_type idx = p - par->particles->begin();
+    
     /* d(dr/dt)/dv = 1.0 */
     gsl_matrix_set(m, ypos(idx, r_x), ypos(idx, v_x), 1.0);
     gsl_matrix_set(m, ypos(idx, r_y), ypos(idx, v_y), 1.0);
