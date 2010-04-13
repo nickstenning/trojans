@@ -23,7 +23,7 @@ point = "every 1::t::t u 2:3 w p"
 accel = "every 1::t::t u 2:3:6:7 w vectors"
 trajectory = "every 1::(t > 30 ? t - 30 : 0)::t u 2:3 w l"
 
-plot 'sun'     u 1:2 ls 1, \
+plot 'sun'     @point ls 1, \
      'jupiter' @point ls 2, \
      'jupiter' @accel ls 2, \
      'jupiter' @trajectory ls 2, \
