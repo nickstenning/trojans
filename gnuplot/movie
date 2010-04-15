@@ -13,7 +13,8 @@ set xrange [-r:r]
 set yrange [-r:r]
 
 t = 0
-T = 1000 # Should match numFrames
+T = 10000 # Should match numFrames
+dt = 2
 pauseTime = 0.01
 
 # 'every 1::t::t' plots only the 't'th point.
@@ -21,7 +22,10 @@ pauseTime = 0.01
 
 point = "every 1::t::t u 2:3 w p"
 accel = "every 1::t::t u 2:3:6:7 w vectors"
-trajectory = "every 1::(t > 30 ? t - 30 : 0)::t u 2:3 w l"
+trajectory = "every 1::(t > 10 ? t - 10 : 0)::t u 2:3 w l"
+
+realt = system("cat system | grep -v '^#' 2>/dev/null | sed '".t."q;d' | cut -f1")
+set title "t = ".realt
 
 plot 'sun'     @point ls 1, \
      'jupiter' @point ls 2, \

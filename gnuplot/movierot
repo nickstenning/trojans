@@ -1,0 +1,48 @@
+if (!gif) load d.'/gnuplot/_anim'
+load d.'/gnuplot/_styles'
+
+set size ratio -1 # scale 1:1
+
+set nokey
+set nomouse
+set macros
+
+r = 8
+
+set xrange [-r:r]
+set yrange [-r:r]
+
+t = 0
+T = 10000 # Should match numFrames
+dt = 20
+tailLen = 1000
+pauseTime = 0.02
+
+# 'every 1::t::t' plots only the 't'th point.
+# 'every 10::0::t' plots every 10th point from 0 to the 't'th point.
+barx = "($10 * cos(w * $1) + $11 * sin(w * $1))"
+bary = "(-$10 * sin(w * $1) + $11 * cos(w * $1))"
+rotx = "(($2 * cos(w * $1) + $3 * sin(w * $1)) - @barx)"
+roty = "((-$2 * sin(w * $1) + $3 * cos(w * $1)) - @bary)"
+
+point = "every 1::t::t u @rotx:@roty w p"
+trajectory = "every 1::(t > tailLen ? t - tailLen : 0)::t u @rotx:@roty w l"
+
+period = system("cat jupiter | cut -f1,2 | ../../period.rb")
+w = -2 * pi / period
+
+realt = system("cat system | grep -v '^#' 2>/dev/null | sed '".t."q;d' | cut -f1")
+set title "t = ".realt
+
+set xlabel "r_x / a.u."
+set ylabel "r_y / a.u."
+
+plot '<join sun system'     @point ls 1, \
+     '<join jupiter system' @point ls 2, \
+     '<join trojans system' @point ls 3, \
+     '<join trojans system' @trajectory ls 3, \
+     '<join greeks system' @point ls 4, \
+     '<join greeks system' @trajectory ls 4
+
+
+load d.'/gnuplot/_timestep'

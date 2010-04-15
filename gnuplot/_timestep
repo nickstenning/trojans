@@ -1,5 +1,9 @@
 pause pauseTime
-t = t + 1
+t = t + dt
+
+realt = system("cat system | grep -v '^#' 2>/dev/null | sed '".t."q;d' | cut -f1")
+set title "t = ".realt
+
 replot
 
-if (t + 1 < T) load d.'/gnuplot/_timestep'
+if (t + dt < T) reread
