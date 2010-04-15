@@ -36,13 +36,13 @@ public:
   
   bool const& fixed() const;
 
-  bool operator== (const Particle& rhs) const;
-  bool operator!= (const Particle& rhs) const;
+  bool operator== (Particle const& rhs) const;
+  bool operator!= (Particle const& rhs) const;
   
   void printHeader (std::ofstream& ofs) const;
-  void printData (const double& time, std::ofstream& ofs) const;
+  void printData (double const& time, std::ofstream& ofs) const;
 
-  friend std::ostream& operator<< (std::ostream& os, const Particle& p);
+  friend std::ostream& operator<< (std::ostream& os, Particle const& p);
   friend std::istream& operator>> (std::istream& is, Particle& p);
 
 protected:

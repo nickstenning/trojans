@@ -15,21 +15,21 @@ double Point::normsq () const
   return (x * x + y * y);
 }
 
-Point& Point::operator= (const Point& rhs)
+Point& Point::operator= (Point const& rhs)
 {
   x = rhs.x;
   y = rhs.y;
   return *this;
 }
 
-Point& Point::operator+= (const Point& rhs)
+Point& Point::operator+= (Point const& rhs)
 {
   x += rhs.x;
   y += rhs.y;
   return *this;
 }
 
-Point& Point::operator-= (const Point& rhs)
+Point& Point::operator-= (Point const& rhs)
 {
   x -= rhs.x;
   y -= rhs.y;
@@ -60,22 +60,22 @@ const Point Point::operator/(double divisor) const
   return Point(*this) /= divisor;
 }
 
-const Point Point::operator+(const Point& rhs) const
+const Point Point::operator+(Point const& rhs) const
 {
   return Point(*this) += rhs;
 }
 
-const Point Point::operator-(const Point& rhs) const
+const Point Point::operator-(Point const& rhs) const
 {
   return Point(*this) -= rhs;
 }
 
-const Point operator*(double factor, const Point& rhs)
+const Point operator*(double factor, Point const& rhs)
 {
   return Point(rhs) *= factor;
 }
 
-ostream &operator<<(ostream& os, const Point& obj)
+ostream &operator<<(ostream& os, Point const& obj)
 {
   os << "[" << obj.x << ", " << obj.y << "]";
   return os;

@@ -13,25 +13,25 @@ Particle::Particle (string n, const double m,
 
 string const& Particle::name () const { return name_; }
 
-void Particle::name (const string& newName) {
+void Particle::name (string const& newName) {
   name_ = newName;
 }
 
 double const& Particle::mass () const { return mass_; }
 
-void Particle::mass (const double& newMass) {
+void Particle::mass (double const& newMass) {
   mass_ = newMass;
 }
 
 double const& Particle::energy () const { return energy_; }
 
-void Particle::energy (const double& newEnergy) {
+void Particle::energy (double const& newEnergy) {
   energy_ = newEnergy;
 }
 
 Point const& Particle::position () const { return position_; }
 
-void Particle::position (const Point& newPosition) {
+void Particle::position (Point const& newPosition) {
   if (fixed_) { return; }
   position_ = newPosition;
 }
@@ -72,7 +72,7 @@ void Particle::printHeader (ofstream& ofs) const {
   ofs << endl;
 }
 
-void Particle::printData (const double& t, ofstream& ofs) const { 
+void Particle::printData (double const& t, ofstream& ofs) const { 
   if (fixed_) {
     ofs << position_.x << "\t" << position_.y << endl;
     ofs.close(); // Won't come round again.
@@ -85,7 +85,7 @@ void Particle::printData (const double& t, ofstream& ofs) const {
   }
 }
 
-ostream& operator<< (ostream& os, const Particle& p) {
+ostream& operator<< (ostream& os, Particle const& p) {
   os << "<Particle " << p.name_;
   os << " m:" << p.mass_;
   os << " r:" << p.position_;

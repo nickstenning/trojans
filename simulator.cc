@@ -78,7 +78,9 @@ void Simulator::run (double tMax, size_t numFrames,
   t  = 0.0;
   dt = 1e-6;
   
-  for (size_t frame = 0; frame < numFrames; ++frame) {
+  printData(); // Print t = 0 frame.
+  
+  for (size_t frame = 0; frame < numFrames - 1; ++frame) {
       double tFrame = (frame + 1) * (tMax / numFrames);
 
       while (t < tFrame) {
@@ -145,18 +147,25 @@ void Simulator::setParticlesFromArray(double const y []) {
 
 void Simulator::printData () {
   double totalEnergy = 0.0;
+  double totalMass = 0.0;
+  Point barycenter;
 
   for (Particles::iterator p = particles.begin(); p != particles.end(); ++p) {
     Particles::difference_type idx = p - particles.begin();
 
     totalEnergy += p->energy();
+    totalMass += p->mass();
+    
+    barycenter += p->position() * p->mass();
     
     if (particleDataFiles.at(idx)->is_open()) {
       p->printData(t, *particleDataFiles.at(idx));
     }
   }
+  
+  barycenter /= totalMass;
 
-  dataFile << t << "\t" << totalEnergy << endl;
+  dataFile << t << "\t" << totalEnergy << "\t" << barycenter.x << "\t" << barycenter.y << endl;
 }
 
 void Simulator::openDataFiles () {
@@ -180,7 +189,7 @@ void Simulator::openDataFiles () {
 
   if (dataFile.is_open()) {
     dataFile << "# system" << endl;
-    dataFile << "# t\tenergy" << endl;
+    dataFile << "# t\tenergy\tbary_x\tbary_y" << endl;
   } else {
     cerr << "ERROR: Unable to open output file for writing (" << fname << ")!" << endl;
     exit(2);
