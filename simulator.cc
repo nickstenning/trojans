@@ -2,13 +2,23 @@
 
 using namespace std;
 
+string const Simulator::lockFileName = "lock";
+
 Simulator::Simulator (string od) : outputDir(od)
 {
+  // Append slash to outputDir if not provided.
   if (outputDir.compare(outputDir.length() - 1, 1, "/") != 0) {
     outputDir.append("/");
   }
 
   system(("mkdir -p " + outputDir).c_str());
+  
+  string lockFile = outputDir + lockFileName;
+  
+  if( access( lockFile.c_str(), F_OK ) != -1 ) {
+    cerr << "Refusing to proceed while lockfile '" << lockFile << "' exists: exiting!" << endl;
+    exit(1);
+  }
 }
 
 Simulator::~Simulator () {
@@ -17,7 +27,7 @@ Simulator::~Simulator () {
   for (vector<ofstream*>::iterator f = particleDataFiles.begin(); f != particleDataFiles.end(); ++f) {
     if ((*f)->is_open()) { (*f)->close(); }
     delete *f;
-  } 
+  }
 }
 
 int Simulator::addParticle (Particle& p)
@@ -106,15 +116,15 @@ void Simulator::run (double tMax, size_t numFrames,
 
   delete [] y;
   y = NULL;
+  
+  createLockFile();
 }
 
-size_t Simulator::degreesOfFreedom () const
-{
+size_t Simulator::degreesOfFreedom () const {
   return dofParticle * particles.size();
 }
 
-ostream& operator<< (ostream &os, Simulator const& s)
-{
+ostream& operator<< (ostream &os, Simulator const& s) {
   os << "<Simulator particles:[" << endl;
   for (Particles::const_iterator p = s.particles.begin(); p != s.particles.end(); ++p) {
     os << "  " << *p << "," << endl;
@@ -207,6 +217,13 @@ void Simulator::openDataFiles () {
     cerr << "ERROR: Unable to open output file for writing (" << fname << ")!" << endl;
     exit(2);
   }
+}
+
+void Simulator::createLockFile () {
+  string lockFile = outputDir + lockFileName;
+  ofstream lf (lockFile.c_str());
+  lf << endl;
+  lf.close();
 }
 
 size_t ypos (size_t index, ParticleProperty prop) {

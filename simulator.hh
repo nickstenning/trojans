@@ -39,6 +39,7 @@ public:
   
   void openDataFiles ();
   void printData ();
+  void createLockFile ();
 protected:
   Particles particles;
   std::string outputDir;
@@ -46,6 +47,8 @@ protected:
   std::vector<std::ofstream*> particleDataFiles;
   double t;
   double dt;
+  
+  static const std::string lockFileName;
 
   void setArrayFromParticles(double y []);
   void setParticlesFromArray(double const y []);
