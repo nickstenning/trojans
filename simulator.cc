@@ -4,8 +4,7 @@ using namespace std;
 
 string const Simulator::lockFileName = "lock";
 
-Simulator::Simulator (string od) : outputDir(od)
-{
+Simulator::Simulator (string od) : outputDir(od) {
   // Append slash to outputDir if not provided.
   if (outputDir.compare(outputDir.length() - 1, 1, "/") != 0) {
     outputDir.append("/");
@@ -30,13 +29,12 @@ Simulator::~Simulator () {
   }
 }
 
-int Simulator::addParticle (Particle& p)
-{
+int Simulator::addParticle (Particle& p) {
   particles.push_back(p);
   return particles.size();
 }
 
-void Simulator::updateParticle (Particle& particle) {  
+void Simulator::updateParticle (Particle& particle) {
   if (particle.fixed()) {
     return;
   }
@@ -61,9 +59,7 @@ void Simulator::updateParticle (Particle& particle) {
   particle.energy(energy);
 }
 
-void Simulator::run (double tMax, size_t numFrames,
-                     void (*onFrameFunc)(size_t)) throw(string)
-{
+void Simulator::run (double tMax, size_t numFrames, void (*onFrameFunc)(size_t)) throw(string) {
   openDataFiles();
 
   Params par;
@@ -125,9 +121,9 @@ size_t Simulator::degreesOfFreedom () const {
 }
 
 ostream& operator<< (ostream &os, Simulator const& s) {
-  os << "<Simulator particles:[" << endl;
+  os << "<Simulator particles:[\n";
   for (Particles::const_iterator p = s.particles.begin(); p != s.particles.end(); ++p) {
-    os << "  " << *p << "," << endl;
+    os << "  " << *p << ",\n";
   }
   os << "]>";
   return os;
@@ -188,7 +184,7 @@ void Simulator::printData () {
     dataFile << "\t" << (jupPos - barycenter).arg();
   }
   
-  dataFile << endl;
+  dataFile << "\n";
 }
 
 void Simulator::openDataFiles () {
@@ -211,8 +207,8 @@ void Simulator::openDataFiles () {
   dataFile.open(fname.c_str(), ios::out | ios::trunc);
 
   if (dataFile.is_open()) {
-    dataFile << "# system" << endl;
-    dataFile << "# t\tenergy\tbary_x\tbary_y" << endl;
+    dataFile << "# system\n";
+    dataFile << "# t\tenergy\tbary_x\tbary_y\tjup_theta\n";
   } else {
     cerr << "ERROR: Unable to open output file for writing (" << fname << ")!" << endl;
     exit(2);

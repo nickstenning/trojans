@@ -61,7 +61,7 @@ bool Particle::operator!= (Particle const& rhs) const {
 }
 
 void Particle::printHeader (ofstream& ofs) const {  
-  ofs << "# " << name_ << endl;
+  ofs << "# " << name_ << "\n";
   
   if (fixed_) {
     ofs << "# r_x\tr_y";
@@ -69,19 +69,19 @@ void Particle::printHeader (ofstream& ofs) const {
     ofs << "# t\tr_x\tr_y\tv_x\tv_y\ta_x\ta_y\tenergy";
   }
 
-  ofs << endl;
+  ofs << "\n";
 }
 
 void Particle::printData (double const& t, ofstream& ofs) const { 
   if (fixed_) {
-    ofs << position_.x << "\t" << position_.y << endl;
+    ofs << position_.x << "\t" << position_.y << "\n";
     ofs.close(); // Won't come round again.
   } else {
     ofs << t << "\t"
         << position_.x << "\t" << position_.y << "\t"
         << velocity_.x << "\t" << velocity_.y << "\t"
         << acceleration_.x << "\t" << acceleration_.y << "\t"
-        << energy_ << endl;
+        << energy_ << "\n";
   }
 }
 
