@@ -1,9 +1,13 @@
-initialEnergy = `cat system | grep -v '^#' | cut -f2 2>/dev/null | head -1`
+initialEnergy = `cat system | grep -v '^#' | cut -f2 2>/dev/null | head -2 | tail -1`
 
 set nokey
+
+set xrange [0:500]
+
 set xlabel "time / years"
 set ylabel "E_{system} / initial E_{system}"
 
-plot 'system' u 1:($2 / initialEnergy) w l
+# every 1::1 plots every point from the '1'th (i.e. second) point
+plot 'system' every 1::1 u 1:($2 / initialEnergy) w l
 
 pause -1
