@@ -12,6 +12,7 @@ public:
 
   double norm() const;
   double normsq() const;
+  double arg() const;
 
   Point& operator= (Point const& rhs);
   Point& operator+= (Point const& rhs);

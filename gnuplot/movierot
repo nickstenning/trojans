@@ -20,16 +20,13 @@ pauseTime = 0.02
 
 # 'every 1::t::t' plots only the 't'th point.
 # 'every 10::0::t' plots every 10th point from 0 to the 't'th point.
-barx = "($10 * cos(w * $1) + $11 * sin(w * $1))"
-bary = "(-$10 * sin(w * $1) + $11 * cos(w * $1))"
-rotx = "(($2 * cos(w * $1) + $3 * sin(w * $1)) - @barx)"
-roty = "((-$2 * sin(w * $1) + $3 * cos(w * $1)) - @bary)"
+barx = "($10 * cos($12 - pi/2) + $11 * sin($12 - pi/2))"
+bary = "(-$10 * sin($12 - pi/2) + $11 * cos($12 - pi/2))"
+rotx = "(($2 * cos($12 - pi/2) + $3 * sin($12 - pi/2)) - @barx)"
+roty = "((-$2 * sin($12 - pi/2) + $3 * cos($12 - pi/2)) - @bary)"
 
 point = "every 1::t::t u @rotx:@roty w p"
 trajectory = "every 1::(t > tailLen ? t - tailLen : 0)::t u @rotx:@roty w l"
-
-period = system("cat jupiter | cut -f1,2 | ../../period.rb")
-w = -2 * pi / period
 
 realt = system("cat system | grep -v '^#' 2>/dev/null | sed '".t."q;d' | cut -f1")
 set title "t = ".realt

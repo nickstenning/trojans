@@ -149,6 +149,8 @@ void Simulator::printData () {
   double totalEnergy = 0.0;
   double totalMass = 0.0;
   Point barycenter;
+  bool foundJupiter;
+  Point jupPos;
 
   for (Particles::iterator p = particles.begin(); p != particles.end(); ++p) {
     Particles::difference_type idx = p - particles.begin();
@@ -158,6 +160,11 @@ void Simulator::printData () {
     
     barycenter += p->position() * p->mass();
     
+    if (p->name() == "jupiter") {
+      foundJupiter = true;
+      jupPos = p->position();
+    }
+    
     if (particleDataFiles.at(idx)->is_open()) {
       p->printData(t, *particleDataFiles.at(idx));
     }
@@ -165,7 +172,13 @@ void Simulator::printData () {
   
   barycenter /= totalMass;
 
-  dataFile << t << "\t" << totalEnergy << "\t" << barycenter.x << "\t" << barycenter.y << endl;
+  dataFile << t << "\t" << totalEnergy << "\t" << barycenter.x << "\t" << barycenter.y;
+  
+  if (foundJupiter) {
+    dataFile << "\t" << (jupPos - barycenter).arg();
+  }
+  
+  dataFile << endl;
 }
 
 void Simulator::openDataFiles () {
