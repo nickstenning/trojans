@@ -207,8 +207,7 @@ void Simulator::openDataFiles () {
   dataFile.open(fname.c_str(), ios::out | ios::trunc);
 
   if (dataFile.is_open()) {
-    dataFile << "# system\n";
-    dataFile << "# t\tenergy\tbary_x\tbary_y\tjup_theta\n";
+    dataFile << "#t\tenergy\tbary_x\tbary_y\tjup_theta\n";
   } else {
     cerr << "ERROR: Unable to open output file for writing (" << fname << ")!" << endl;
     exit(2);

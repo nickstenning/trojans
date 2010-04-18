@@ -61,12 +61,11 @@ bool Particle::operator!= (Particle const& rhs) const {
 }
 
 void Particle::printHeader (ofstream& ofs) const {  
-  ofs << "# " << name_ << "\n";
   
   if (fixed_) {
-    ofs << "# r_x\tr_y";
+    ofs << "#r_x\tr_y";
   } else {
-    ofs << "# t\tr_x\tr_y\tv_x\tv_y\ta_x\ta_y\tenergy";
+    ofs << "#t\tr_x\tr_y\tv_x\tv_y\ta_x\ta_y\tenergy";
   }
 
   ofs << "\n";

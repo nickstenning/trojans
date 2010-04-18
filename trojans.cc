@@ -23,15 +23,12 @@ void onframe(size_t frame);
 
 int main (int argc, char* const argv [])
 {
-  if (argc != 2)
-  {
+  if (argc != 2) {
     cerr << "Usage: trojans <outputdir>" << endl << endl;
     cerr << "Output will be multiple files. Run ./movie <outputdir> to see the result." << endl;
     return 1;
 
-  }
-  else
-  {
+  } else {
     // Increase precision of double printers.
     cout << setprecision(9);
     cerr << setprecision(9);
@@ -56,8 +53,7 @@ int main (int argc, char* const argv [])
       }
     }
     
-    try
-    {
+    try {
       cerr << sim << endl << endl;
       cerr << "Params: t = 0.." << T << ", numFrames = " << numFrames << endl << endl;
       cerr << "Simulator running ";
@@ -67,9 +63,7 @@ int main (int argc, char* const argv [])
       onframe(numFrames); // Last frame.
       
       cerr << endl;
-    }
-    catch( string str )
-    {
+    } catch( string str ) {
       cerr << endl << "Exception raised: " << str << endl;
       return 1;
     }
@@ -80,8 +74,7 @@ int main (int argc, char* const argv [])
 
 void onframe(size_t frame)
 {
-  if (frame > 0)
-  {
+  if (frame > 0) {
     for (size_t i = 0; i < ((2 * frameStrSize) + 3); ++i) { cerr << '\b'; }
   }
 
