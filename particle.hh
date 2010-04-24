@@ -14,7 +14,7 @@ class Particle
 {
 public:
   Particle();
-  Particle(std::string name, double mass, Point x0, Arrow v0, bool fixed);
+  Particle(std::string name, double mass, Point x0, Arrow v0);
 
   std::string const& name() const;
   void name(std::string const& newName);
@@ -34,8 +34,6 @@ public:
   Arrow const& acceleration() const;
   void acceleration(Point const& newAcceleration);
 
-  bool const& fixed() const;
-
   bool operator==(Particle const& rhs) const;
   bool operator!=(Particle const& rhs) const;
 
@@ -52,7 +50,6 @@ protected:
   Point position_;
   Arrow velocity_;
   Arrow acceleration_;
-  bool fixed_;
 };
 
 typedef std::vector<Particle> Particles;

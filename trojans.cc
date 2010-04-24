@@ -12,7 +12,7 @@ using std::cerr;
 using std::endl;
 
 // simulator run time (number of orbits * keplerian orbital period)
-double T = 100 * 11.8724228;
+double T = 1 * 11.8724228;
 // number of frames to print
 size_t numFrames = 10000;
 
@@ -24,14 +24,10 @@ int main(int argc, char* const argv[]) {
   if (argc != 2) {
     cerr << "Usage: trojans <outputdir> < config" << endl << endl;
     cerr << "Output will be multiple files. "
-         << "Run, for example, ./plot.sh movie <outputdir> to see the result." << endl;
+         << "Run, for example, `./plot.sh <outputdir> movie` to see the result." << endl;
     return 1;
 
   } else {
-    // Increase precision of double printers.
-    cout << std::setprecision(9);
-    cerr << std::setprecision(9);
-
     // Create new simulator with output directory as specified on the command line.
     Simulator sim(argv[1]);
 

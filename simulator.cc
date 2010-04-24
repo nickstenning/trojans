@@ -37,10 +37,6 @@ int Simulator::addParticle(Particle const& particle) {
 }
 
 void Simulator::updateParticle(Particle& particle) {
-  if (particle.fixed()) {
-    return;
-  }
-
   double energy;
   Arrow acceleration, distance;
 
@@ -200,6 +196,7 @@ void Simulator::openDataFiles() {
 
     if (df->is_open()) {
       p->printHeader(*df);
+      *df << std::setprecision(9);
     } else {
       cerr << "ERROR: Unable to open output file for writing (" << fname << ")!" << endl;
       exit(2);
@@ -211,6 +208,7 @@ void Simulator::openDataFiles() {
 
   if (dataFile.is_open()) {
     dataFile << "#t\tenergy\tbary_x\tbary_y\tjup_theta\n";
+    dataFile << std::setprecision(9);
   } else {
     cerr << "ERROR: Unable to open output file for writing (" << fname << ")!" << endl;
     exit(2);

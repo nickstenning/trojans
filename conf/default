@@ -1,5 +1,5 @@
-# name   mass   r_x        r_y  v_x      v_y         fixed?
-sun      1      0          0    0        0           false
-jupiter  0.001  0          5.2  2.757    0           false
-trojans  0      4.5033321  2.6  1.3785  -2.38763204  false
-greeks   0     -4.5033321  2.6  1.3785   2.38763204  false
+# name   mass   r_x        r_y  v_x      v_y
+sun      1      0          0    0        0
+jupiter  0.001  0          5.2  2.757    0
+trojans  0      4.5033321  2.6  1.3785  -2.38763204
+greeks   0     -4.5033321  2.6  1.3785   2.38763204
