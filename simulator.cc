@@ -1,65 +1,67 @@
 #include "simulator.hh"
 
-using namespace std;
+using std::cout;
+using std::cerr;
+using std::endl;
 
-string const Simulator::lockFileName = "lock";
+char const Simulator::lockFileName[] = "lock";
 
-Simulator::Simulator (string od) : outputDir(od) {
+Simulator::Simulator(std::string od) : outputDir(od) {
   // Append slash to outputDir if not provided.
   if (outputDir.compare(outputDir.length() - 1, 1, "/") != 0) {
     outputDir.append("/");
   }
 
   system(("mkdir -p " + outputDir).c_str());
-  
-  string lockFile = outputDir + lockFileName;
-  
-  if( access( lockFile.c_str(), F_OK ) != -1 ) {
+
+  std::string lockFile = outputDir + lockFileName;
+
+  if (access(lockFile.c_str(), F_OK) != -1) {
     cerr << "Refusing to proceed while lockfile '" << lockFile << "' exists: exiting!" << endl;
     exit(1);
   }
 }
 
-Simulator::~Simulator () {
+Simulator::~Simulator() {
   if (dataFile.is_open()) { dataFile.close(); }
-  
-  for (vector<ofstream*>::iterator f = particleDataFiles.begin(); f != particleDataFiles.end(); ++f) {
+
+  for (std::vector<std::ofstream*>::iterator f = particleDataFiles.begin(); f != particleDataFiles.end(); ++f) {
     if ((*f)->is_open()) { (*f)->close(); }
     delete *f;
   }
 }
 
-int Simulator::addParticle (Particle& p) {
-  particles.push_back(p);
+int Simulator::addParticle(Particle const& particle) {
+  particles.push_back(particle);
   return particles.size();
 }
 
-void Simulator::updateParticle (Particle& particle) {
+void Simulator::updateParticle(Particle& particle) {
   if (particle.fixed()) {
     return;
   }
-  
+
   double energy;
   Arrow acceleration, distance;
 
-  for (Particles::const_iterator p = particles.begin(); p != particles.end(); ++p)
-  {
-    if (*p != particle) { // Don't calculate acceleration due to this particle.
+  for (Particles::const_iterator p = particles.begin(); p != particles.end(); ++p) {
+    // Don't calculate acceleration due to this particle.
+    if (*p != particle) {
       distance = p->position() - particle.position();
-      
+
       energy += (C::G_scaled * p->mass() * particle.mass()) / distance.norm();
       acceleration += (C::G_scaled * p->mass() * distance) / pow(distance.norm(), 3);
     }
   }
-  
+
   // KE
   energy += (particle.mass() * particle.velocity().normsq()) / 2.0;
-  
+
   particle.acceleration(acceleration);
   particle.energy(energy);
 }
 
-void Simulator::run (double tMax, size_t numFrames, void (*onFrameFunc)(size_t)) throw(string) {
+void Simulator::run(double tMax, size_t numFrames, void (*onFrameFunc)(size_t)) throw(std::string) {
   openDataFiles();
 
   Params par;
@@ -83,26 +85,27 @@ void Simulator::run (double tMax, size_t numFrames, void (*onFrameFunc)(size_t))
 
   t  = 0.0;
   dt = 1e-6;
-  
-  printData(); // Print t = 0 frame.
-  
+
+  // Print t = 0 frame.
+  printData();
+
   for (size_t frame = 0; frame < numFrames - 1; ++frame) {
       double tFrame = (frame + 1) * (tMax / numFrames);
 
       while (t < tFrame) {
         setArrayFromParticles(y);
-        
+
         int status = gsl_odeiv_evolve_apply(e, c, s, &sys, &t, tFrame, &dt, y);
 
         if (status != GSL_SUCCESS) {
-          throw string("GSL failure.");
+          throw std::string("GSL failure.");
           break;
         }
 
         setParticlesFromArray(y);
       }
 
-      printData();      
+      printData();
       onFrameFunc(frame);
   }
 
@@ -112,15 +115,15 @@ void Simulator::run (double tMax, size_t numFrames, void (*onFrameFunc)(size_t))
 
   delete [] y;
   y = NULL;
-  
+
   createLockFile();
 }
 
-size_t Simulator::degreesOfFreedom () const {
+size_t Simulator::degreesOfFreedom() const {
   return dofParticle * particles.size();
 }
 
-ostream& operator<< (ostream &os, Simulator const& s) {
+std::ostream& operator<<(std::ostream &os, Simulator const& s) {
   os << "<Simulator particles:[\n";
   for (Particles::const_iterator p = s.particles.begin(); p != s.particles.end(); ++p) {
     os << "  " << *p << ",\n";
@@ -129,7 +132,7 @@ ostream& operator<< (ostream &os, Simulator const& s) {
   return os;
 }
 
-void Simulator::setArrayFromParticles(double y []) {
+void Simulator::setArrayFromParticles(double y[]) {
   for (Particles::const_iterator p = particles.begin(); p != particles.end(); ++p) {
     Particles::difference_type idx = p - particles.begin();
 
@@ -140,18 +143,18 @@ void Simulator::setArrayFromParticles(double y []) {
   }
 }
 
-void Simulator::setParticlesFromArray(double const y []) {
+void Simulator::setParticlesFromArray(double const y[]) {
   for (Particles::iterator p = particles.begin(); p != particles.end(); ++p) {
     Particles::difference_type idx = p - particles.begin();
 
     p->position(Point(y[ypos(idx, r_x)], y[ypos(idx, r_y)]));
     p->velocity(Arrow(y[ypos(idx, v_x)], y[ypos(idx, v_y)]));
-    
+
     updateParticle(*p);
   }
 }
 
-void Simulator::printData () {
+void Simulator::printData() {
   double totalEnergy = 0.0;
   double totalMass = 0.0;
   Point barycenter;
@@ -163,38 +166,38 @@ void Simulator::printData () {
 
     totalEnergy += p->energy();
     totalMass += p->mass();
-    
+
     barycenter += p->position() * p->mass();
-    
+
     if (p->name() == "jupiter") {
       foundJupiter = true;
       jupPos = p->position();
     }
-    
+
     if (particleDataFiles.at(idx)->is_open()) {
       p->printData(t, *particleDataFiles.at(idx));
     }
   }
-  
+
   barycenter /= totalMass;
 
   dataFile << t << "\t" << totalEnergy << "\t" << barycenter.x << "\t" << barycenter.y;
-  
+
   if (foundJupiter) {
     dataFile << "\t" << (jupPos - barycenter).arg();
   }
-  
+
   dataFile << "\n";
 }
 
-void Simulator::openDataFiles () {
+void Simulator::openDataFiles() {
   particleDataFiles.clear();
-  
+
   for (Particles::const_iterator p = particles.begin(); p != particles.end(); ++p) {
-    string fname(outputDir + p->name());
-    ofstream* df = new ofstream(fname.c_str(), ios::out | ios::trunc);
+    std::string fname(outputDir + p->name());
+    std::ofstream* df = new std::ofstream(fname.c_str(), std::ios::out | std::ios::trunc);
     particleDataFiles.push_back(df);
-    
+
     if (df->is_open()) {
       p->printHeader(*df);
     } else {
@@ -202,9 +205,9 @@ void Simulator::openDataFiles () {
       exit(2);
     }
   }
-  
-  string fname(outputDir + "system");
-  dataFile.open(fname.c_str(), ios::out | ios::trunc);
+
+  std::string fname(outputDir + "system");
+  dataFile.open(fname.c_str(), std::ios::out | std::ios::trunc);
 
   if (dataFile.is_open()) {
     dataFile << "#t\tenergy\tbary_x\tbary_y\tjup_theta\n";
@@ -214,23 +217,23 @@ void Simulator::openDataFiles () {
   }
 }
 
-void Simulator::createLockFile () {
-  string lockFile = outputDir + lockFileName;
-  ofstream lf (lockFile.c_str());
+void Simulator::createLockFile() {
+  std::string lockFile = outputDir + lockFileName;
+  std::ofstream lf(lockFile.c_str());
   lf << endl;
   lf.close();
 }
 
-size_t ypos (size_t index, ParticleProperty prop) {
+size_t ypos(size_t index, ParticleProperty prop) {
   return Simulator::dofParticle * index + prop;
 }
 
-int func (double /*t*/, double const y [], double dy_dt [], void* params) {
-  Params *par = (Params *) params;
+int func(double /*t*/, double const y[], double dy_dt[], void* params) {
+  Params* par = static_cast<Params*>(params);
 
   for (Particles::const_iterator p = par->particles->begin(); p != par->particles->end(); ++p) {
     Particles::difference_type idx = p - par->particles->begin();
-    
+
     // dv/dt = a --> dx_1/dt = accel
     dy_dt[ypos(idx, v_x)] = p->acceleration().x;
     dy_dt[ypos(idx, v_y)] = p->acceleration().y;
@@ -243,8 +246,8 @@ int func (double /*t*/, double const y [], double dy_dt [], void* params) {
   return GSL_SUCCESS;
 }
 
-int jac (double /*t*/, double const /*y*/[], double* df_dy, double df_dt[], void* params) {
-  Params *par = (Params *) params;
+int jac(double /*t*/, double const /*y*/[], double* df_dy, double df_dt[], void* params) {
+  Params* par = static_cast<Params*>(params);
 
   size_t dof = Simulator::dofParticle * par->particles->size();
 
@@ -256,13 +259,13 @@ int jac (double /*t*/, double const /*y*/[], double* df_dy, double df_dt[], void
 
   for (Particles::const_iterator p = par->particles->begin(); p != par->particles->end(); ++p) {
     Particles::difference_type idx = p - par->particles->begin();
-    
+
     /* d(dr/dt)/dv = 1.0 */
     gsl_matrix_set(m, ypos(idx, r_x), ypos(idx, v_x), 1.0);
     gsl_matrix_set(m, ypos(idx, r_y), ypos(idx, v_y), 1.0);
   }
 
-  fill(df_dt, df_dt + dof, 0.0);
+  std::fill(df_dt, df_dt + dof, 0.0);
 
   return GSL_SUCCESS;
 }

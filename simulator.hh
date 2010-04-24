@@ -27,7 +27,7 @@ public:
   Simulator (std::string outputDir);
   ~Simulator ();
 
-  int addParticle (Particle& p);
+  int addParticle (Particle const& p);
   void updateParticle (Particle& p);
   
   void run (double tMax, size_t numFrames, void (*onFrameFunc)(size_t)) throw(std::string);
@@ -48,7 +48,7 @@ protected:
   double t;
   double dt;
   
-  static const std::string lockFileName;
+  static char const lockFileName[];
 
   void setArrayFromParticles(double y []);
   void setParticlesFromArray(double const y []);
