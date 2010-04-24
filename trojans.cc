@@ -11,13 +11,9 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-/* radius of jupiter's orbit in a.u. */
-double Rjup = 5.2;
-/* tangential velocity of jupiter in a.u./year */
-double Vjup = 2.757;
-/* simulator run time (N * keplerian orbital period) */
-double T = 1 * sqrt(pow(Rjup, 3));
-/* number of frames to print */
+// simulator run time (number of orbits * keplerian orbital period)
+double T = 100 * 11.8724228;
+// number of frames to print
 size_t numFrames = 10000;
 
 size_t frameStrSize;
