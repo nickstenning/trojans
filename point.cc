@@ -2,46 +2,46 @@
 
 using namespace std;
 
-Point::Point (double x0, double y0) : x(x0), y(y0) {}
-Point::Point () : x(0), y(0) {}
+Point::Point(double x0, double y0) : x(x0), y(y0) {}
+Point::Point() : x(0), y(0) {}
 
-double Point::norm () const {
+double Point::norm() const {
   return sqrt(normsq());
 }
 
-double Point::normsq () const {
+double Point::normsq() const {
   return (x * x + y * y);
 }
 
-double Point::arg () const {
+double Point::arg() const {
   return atan2(y, x);
 }
 
-Point& Point::operator= (Point const& rhs) {
+Point& Point::operator=(Point const& rhs) {
   x = rhs.x;
   y = rhs.y;
   return *this;
 }
 
-Point& Point::operator+= (Point const& rhs) {
+Point& Point::operator+=(Point const& rhs) {
   x += rhs.x;
   y += rhs.y;
   return *this;
 }
 
-Point& Point::operator-= (Point const& rhs) {
+Point& Point::operator-=(Point const& rhs) {
   x -= rhs.x;
   y -= rhs.y;
   return *this;
 }
 
-Point& Point::operator*= (double rhs) {
+Point& Point::operator*=(double rhs) {
   x *= rhs;
   y *= rhs;
   return *this;
 }
 
-Point& Point::operator/= (double rhs) {
+Point& Point::operator/=(double rhs) {
   x /= rhs;
   y /= rhs;
   return *this;
