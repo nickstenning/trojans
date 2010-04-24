@@ -5,8 +5,8 @@ using namespace std;
 
 Particle::Particle () {}
 
-Particle::Particle (string n, const double m, 
-                    Point r = Point(), Arrow v = Arrow(), 
+Particle::Particle (string n, const double m,
+                    Point r = Point(), Arrow v = Arrow(),
                     bool f = false)
 : name_(n), mass_(m), position_(r), velocity_(v), fixed_(f)
 {}
@@ -60,8 +60,8 @@ bool Particle::operator!= (Particle const& rhs) const {
   return !(*this == rhs);
 }
 
-void Particle::printHeader (ofstream& ofs) const {  
-  
+void Particle::printHeader (ofstream& ofs) const {
+
   if (fixed_) {
     ofs << "#r_x\tr_y";
   } else {
@@ -71,7 +71,7 @@ void Particle::printHeader (ofstream& ofs) const {
   ofs << "\n";
 }
 
-void Particle::printData (double const& t, ofstream& ofs) const { 
+void Particle::printData (double const& t, ofstream& ofs) const {
   if (fixed_) {
     ofs << position_.x << "\t" << position_.y << "\n";
     ofs.close(); // Won't come round again.
@@ -88,7 +88,7 @@ ostream& operator<< (ostream& os, Particle const& p) {
   os << "<Particle " << p.name_;
   os << " m:" << p.mass_;
   os << " r:" << p.position_;
-  if (p.fixed_) { 
+  if (p.fixed_) {
     os << " fixed";
   } else {
     os << " v:" << p.velocity_;

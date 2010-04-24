@@ -17,29 +17,29 @@ struct Params {
   Particles const* particles;
 };
 
-int func (double t,  double const y[], double dy_dt[], void* params);
-int jac (double t, double const y[], double* dfdy, double dfdt[], void* params);
-size_t ypos (size_t index, ParticleProperty prop);
+int func(double t,  double const y[], double dy_dt[], void* params);
+int jac(double t, double const y[], double* dfdy, double dfdt[], void* params);
+size_t ypos(size_t index, ParticleProperty prop);
 
 class Simulator
 {
 public:
-  Simulator (std::string outputDir);
-  ~Simulator ();
+  Simulator(std::string outputDir);
+  ~Simulator();
 
-  int addParticle (Particle const& p);
-  void updateParticle (Particle& p);
-  
-  void run (double tMax, size_t numFrames, void (*onFrameFunc)(size_t)) throw(std::string);
+  int addParticle(Particle const& p);
+  void updateParticle(Particle& p);
 
-  friend std::ostream& operator<< (std::ostream& os, Simulator const& s);
+  int run (double tMax, size_t numFrames, void (*onFrameFunc)(size_t));
+
+  friend std::ostream& operator<<(std::ostream& os, Simulator const& s);
 
   static const size_t dofParticle = 4;
   virtual size_t degreesOfFreedom() const;
-  
-  void openDataFiles ();
-  void printData ();
-  void createLockFile ();
+
+  void openDataFiles();
+  void printData();
+  void createLockFile();
 protected:
   Particles particles;
   std::string outputDir;
@@ -47,7 +47,7 @@ protected:
   std::vector<std::ofstream*> particleDataFiles;
   double t;
   double dt;
-  
+
   static char const lockFileName[];
 
   void setArrayFromParticles(double y []);

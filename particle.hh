@@ -13,37 +13,37 @@
 class Particle
 {
 public:
-  Particle ();
-  Particle (std::string name, double mass, Point x0, Arrow v0, bool fixed);
-  
+  Particle();
+  Particle(std::string name, double mass, Point x0, Arrow v0, bool fixed);
+
   std::string const& name() const;
   void name(std::string const& newName);
 
   double const& mass() const;
   void mass(double const& newMass);
-  
+
   double const& energy() const;
   void energy(double const& newEnergy);
-  
+
   Point const& position() const;
   void position(Point const& newPosition);
-  
+
   Arrow const& velocity() const;
   void velocity(Point const& newVelocity);
-  
+
   Arrow const& acceleration() const;
   void acceleration(Point const& newAcceleration);
-  
+
   bool const& fixed() const;
 
-  bool operator== (Particle const& rhs) const;
-  bool operator!= (Particle const& rhs) const;
-  
-  void printHeader (std::ofstream& ofs) const;
-  void printData (double const& time, std::ofstream& ofs) const;
+  bool operator==(Particle const& rhs) const;
+  bool operator!=(Particle const& rhs) const;
 
-  friend std::ostream& operator<< (std::ostream& os, Particle const& p);
-  friend std::istream& operator>> (std::istream& is, Particle& p);
+  void printHeader(std::ofstream& ofs) const;
+  void printData(double const& time, std::ofstream& ofs) const;
+
+  friend std::ostream& operator<<(std::ostream& os, Particle const& p);
+  friend std::istream& operator>>(std::istream& is, Particle& p);
 
 protected:
   std::string name_;

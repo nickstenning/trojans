@@ -61,7 +61,7 @@ void Simulator::updateParticle(Particle& particle) {
   particle.energy(energy);
 }
 
-void Simulator::run(double tMax, size_t numFrames, void (*onFrameFunc)(size_t)) throw(std::string) {
+int Simulator::run(double tMax, size_t numFrames, void (*onFrameFunc)(size_t)) {
   openDataFiles();
 
   Params par;
@@ -98,8 +98,7 @@ void Simulator::run(double tMax, size_t numFrames, void (*onFrameFunc)(size_t)) 
         int status = gsl_odeiv_evolve_apply(e, c, s, &sys, &t, tFrame, &dt, y);
 
         if (status != GSL_SUCCESS) {
-          throw std::string("GSL failure.");
-          break;
+          return status;
         }
 
         setParticlesFromArray(y);
@@ -117,6 +116,7 @@ void Simulator::run(double tMax, size_t numFrames, void (*onFrameFunc)(size_t)) 
   y = NULL;
 
   createLockFile();
+  return 0;
 }
 
 size_t Simulator::degreesOfFreedom() const {

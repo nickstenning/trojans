@@ -15,8 +15,8 @@ using std::endl;
 double Rjup = 5.2;
 /* tangential velocity of jupiter in a.u./year */
 double Vjup = 2.757;
-/* simulator run time */
-double T = 100 * sqrt(pow(Rjup, 3));
+/* simulator run time (N * keplerian orbital period) */
+double T = 1 * sqrt(pow(Rjup, 3));
 /* number of frames to print */
 size_t numFrames = 10000;
 
@@ -26,9 +26,9 @@ void onframe(size_t frame);
 
 int main(int argc, char* const argv[]) {
   if (argc != 2) {
-    cerr << "Usage: trojans <outputdir>" << endl << endl;
+    cerr << "Usage: trojans <outputdir> < config" << endl << endl;
     cerr << "Output will be multiple files. "
-         << "Run ./movie <outputdir> to see the result." << endl;
+         << "Run, for example, ./plot.sh movie <outputdir> to see the result." << endl;
     return 1;
 
   } else {
@@ -36,16 +36,11 @@ int main(int argc, char* const argv[]) {
     cout << std::setprecision(9);
     cerr << std::setprecision(9);
 
-    // Work out how long the field for frame number should be.
-    std::ostringstream tmp;
-    tmp << numFrames;
-    frameStrSize = tmp.str().size();
-
-    // Create new simulator with output directory specified on the command line.
+    // Create new simulator with output directory as specified on the command line.
     Simulator sim(argv[1]);
 
+    // Load particles from stdin
     std::string s;
-
     while (getline(cin, s)) {
       // ignore comments
       if (s[0] != '#') {
@@ -57,20 +52,29 @@ int main(int argc, char* const argv[]) {
       }
     }
 
-    try {
-      cerr << sim << endl << endl;
-      cerr << "Params: t = 0.." << T << ", numFrames = "
-           << numFrames << "\n\n";
-      cerr << "Simulator running ";
+    // This is a bit of a nasty hack to work out how long the field
+    // for frame number should be.
+    std::ostringstream tmp;
+    tmp << numFrames;
+    frameStrSize = tmp.str().size();
 
-      sim.run(T, numFrames, *onframe);
+    // Dump basic config data to stderr.
+    cerr << sim << endl << endl;
+    cerr << "Params: t = 0.." << T << ", numFrames = "
+         << numFrames << "\n\n";
+    cerr << "Simulator running ";
 
-      onframe(numFrames);  // Last frame.
+    // Run the simulation. This will call the 'onframe' function with the
+    // frame number as its only argument after each frame.
+    int status;
+    status = sim.run(T, numFrames, *onframe);
 
+    if (status == 0) {
+      onframe(numFrames);  // Last frame;
       cerr << endl;
-    } catch(std::string str) {
-      cerr << endl << "Exception raised: " << str << endl;
-      return 1;
+    } else {
+      cerr << "\nGSL error: status " << status << "!" << endl;
+      return status;
     }
 
     return 0;
@@ -83,5 +87,5 @@ void onframe(size_t frame) {
   }
 
   cerr << "[" << std::setw(frameStrSize) << frame << "/"
-              << std::setw(frameStrSize) << numFrames << "]" << std::flush;
+       << std::setw(frameStrSize) << numFrames << "]";
 }
