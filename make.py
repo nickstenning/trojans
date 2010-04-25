@@ -3,7 +3,7 @@
 import os, commands, re
 from fabricate import *
 
-compiler = commands.getoutput('which llvm-g++ || echo -n "g++"')
+compiler = commands.getoutput('which llvm-g++ 2>/dev/null || echo -n "g++"')
          
 target  = 'trojans'
 sources = ['trojans', 'simulator', 'particle', 'point', 'constants']
