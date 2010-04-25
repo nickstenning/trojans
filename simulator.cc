@@ -25,7 +25,8 @@ Simulator::Simulator(std::string od) : outputDir(od) {
 Simulator::~Simulator() {
   if (dataFile.is_open()) { dataFile.close(); }
 
-  for (std::vector<std::ofstream*>::iterator f = particleDataFiles.begin(); f != particleDataFiles.end(); ++f) {
+  for (std::vector<std::ofstream*>::iterator f = particleDataFiles.begin();
+       f != particleDataFiles.end(); ++f) {
     if ((*f)->is_open()) { (*f)->close(); }
     delete *f;
   }
@@ -74,7 +75,7 @@ int Simulator::run(double tMax, size_t numFrames, void (*onFrameFunc)(size_t)) {
   gsl_odeiv_control* c = gsl_odeiv_control_y_new(1e-20, 0);
   gsl_odeiv_evolve* e = gsl_odeiv_evolve_alloc(dof);
 
-  gsl_odeiv_system sys = {func, jac, dof, &par};
+  gsl_odeiv_system sys = {func, NULL, dof, &par};
 
   double *y = NULL;
   y = new double[dof];
@@ -240,30 +241,6 @@ int func(double /*t*/, double const y[], double dy_dt[], void* params) {
     dy_dt[ypos(idx, r_x)] = y[ypos(idx, v_x)];
     dy_dt[ypos(idx, r_y)] = y[ypos(idx, v_y)];
   }
-
-  return GSL_SUCCESS;
-}
-
-int jac(double /*t*/, double const /*y*/[], double* df_dy, double df_dt[], void* params) {
-  Params* par = static_cast<Params*>(params);
-
-  size_t dof = Simulator::dofParticle * par->particles->size();
-
-  gsl_matrix_view df_dy_mat = gsl_matrix_view_array(df_dy, dof, dof);
-  gsl_matrix* m = &df_dy_mat.matrix;
-
-  /* Most matrix elements are zero */
-  gsl_matrix_set_zero(m);
-
-  for (Particles::const_iterator p = par->particles->begin(); p != par->particles->end(); ++p) {
-    Particles::difference_type idx = p - par->particles->begin();
-
-    /* d(dr/dt)/dv = 1.0 */
-    gsl_matrix_set(m, ypos(idx, r_x), ypos(idx, v_x), 1.0);
-    gsl_matrix_set(m, ypos(idx, r_y), ypos(idx, v_y), 1.0);
-  }
-
-  std::fill(df_dt, df_dt + dof, 0.0);
 
   return GSL_SUCCESS;
 }

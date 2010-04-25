@@ -19,7 +19,6 @@ struct Params {
 };
 
 int func(double t,  double const y[], double dy_dt[], void* params);
-int jac(double t, double const y[], double* dfdy, double dfdt[], void* params);
 size_t ypos(size_t index, ParticleProperty prop);
 
 class Simulator
