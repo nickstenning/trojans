@@ -83,6 +83,10 @@ int Simulator::run(double tMax, size_t numFrames, void (*onFrameFunc)(size_t)) {
   t  = 0.0;
   dt = 1e-6;
 
+  for (Particles::iterator p = particles.begin(); p != particles.end(); ++p) {
+    updateParticle(*p);
+  }
+  setArrayFromParticles(y);
   // Print t = 0 frame.
   printData();
 
@@ -90,8 +94,6 @@ int Simulator::run(double tMax, size_t numFrames, void (*onFrameFunc)(size_t)) {
       double tFrame = (frame + 1) * (tMax / numFrames);
 
       while (t < tFrame) {
-        setArrayFromParticles(y);
-
         int status = gsl_odeiv_evolve_apply(e, c, s, &sys, &t, tFrame, &dt, y);
 
         if (status != GSL_SUCCESS) {

@@ -62,13 +62,8 @@ void Particle::printData (double const& t, ofstream& ofs) const {
   ofs << t << "\t"
       << position_.x << "\t" << position_.y << "\t"
       << velocity_.x << "\t" << velocity_.y << "\t"
-      << acceleration_.x << "\t" << acceleration_.y << "\t";
-  if (t == 0) {
-    ofs << "?";
-  } else {
-    ofs << energy_;
-  }
-  ofs << "\n";
+      << acceleration_.x << "\t" << acceleration_.y << "\t"
+      << energy_ << "\n";
 }
 
 ostream& operator<< (ostream& os, Particle const& p) {
