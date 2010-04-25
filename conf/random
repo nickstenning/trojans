@@ -1,0 +1,5 @@
+# name   mass   r_x        r_y  v_x      v_y
+sun      1      0          0    0        0
+jupiter  0.001  0          5.2  2.757    0
+trojans  0      4.5033321  2.6  1.38    -2.38
+greeks   0     -4.5033321  2.6  1.3785   2.4
