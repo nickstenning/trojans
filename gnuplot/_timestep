@@ -1,4 +1,4 @@
-pause pauseTime
+if (!gif) pause pauseTime
 t = t + dt
 
 realt = system("cat system | grep -v '^#' 2>/dev/null | sed '".t."q;d' | cut -f1")
