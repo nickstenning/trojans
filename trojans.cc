@@ -11,7 +11,7 @@ using std::cerr;
 using std::endl;
 
 // simulator run time (number of orbits * keplerian orbital period)
-double T = 1 * 11.8724228;
+double T = 100 * 11.8724228;
 // number of frames to print
 size_t numFrames = 10000;
 
