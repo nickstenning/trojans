@@ -1,4 +1,4 @@
-load d.'/gnuplot/_anim'
+if (!gif) load d.'/gnuplot/_anim'
 load d.'/gnuplot/_styles'
 
 set size ratio -1 # scale 1:1
